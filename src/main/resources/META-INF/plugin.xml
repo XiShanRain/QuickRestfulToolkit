@@ -1,0 +1,38 @@
+<idea-plugin>
+    <id>com.shenszq.restful.toolkit.plus</id>
+    <name>QuickRestfulToolkit</name>
+    <vendor email="support@example.com">shenszq</vendor>
+
+    <description><![CDATA[
+        <h3>RESTful service navigation for IntelliJ IDEA 2024.3+</h3>
+        <ul>
+            <li>Jump from a URL path to the matching controller method.</li>
+            <li>Supports Spring MVC / Spring Boot and JAX-RS.</li>
+            <li>Supports Java and Kotlin controllers without relying on fragile Kotlin internal indexes.</li>
+        </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>com.intellij.properties</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="com.shenszq.restful.navigation.action.GotoRequestMappingConfiguration"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
+
+    <actions>
+        <action id="Toolkit.GotoService"
+                class="com.shenszq.restful.navigation.action.GotoRequestMappingAction"
+                text="Go to REST Service"
+                description="Jump to a REST controller method by URL"
+                icon="AllIcons.Actions.Search">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SLASH"/>
+        </action>
+    </actions>
+</idea-plugin>
