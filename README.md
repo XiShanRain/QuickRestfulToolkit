@@ -6,9 +6,9 @@
 
 一个用于 IntelliJ IDEA 的插件，支持根据请求 URL 或路径快速跳转到对应的后端 REST Controller 方法。
 
-QuickRestfulToolkit 是开源项目 **RestfulToolkitPlus**（Java 版）的 **Kotlin 复刻重写版**。它保留了原项目的核心能力与交互方式，并全程改用 Kotlin 实现，目标很简单：当你已经知道接口地址时，尽可能快地帮你定位到服务端入口代码。插件支持 Spring MVC / Spring Boot、JAX-RS，同时兼容 Java 与 Kotlin 控制器项目。
+QuickRestfulToolkit 是开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 版）的 **Kotlin 复刻重写版**。它保留了原项目的核心能力与交互方式，并全程改用 Kotlin 实现，目标很简单：当你已经知道接口地址时，尽可能快地帮你定位到服务端入口代码。插件支持 Spring MVC / Spring Boot、JAX-RS，同时兼容 Java 与 Kotlin 控制器项目。
 
-> 关于名称：`++` 既是对经典命名的致敬，也表示这是 Java `Plus` 版本之上的 Kotlin 重写升级。
+> 关于名称：`Quick` 取自"快速定位"之意——本插件的核心目标就是当你已知接口地址时，能尽快跳转到服务端入口代码。它是 Java 版 RestfulToolkitPlus 的 Kotlin 复刻重写版。
 
 ## 功能特性
 
@@ -214,7 +214,7 @@ src/main/resources/META-INF/
 
 ## 致谢
 
-本项目复刻自 GitHub 开源项目 **RestfulToolkitPlus**（Java 实现），感谢其提供的设计思路与功能基线。QuickRestfulToolkit 在此基础上完成了 Kotlin 化的整体重写。
+本项目复刻自 GitHub 开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 实现），感谢其提供的设计思路与功能基线。QuickRestfulToolkit 在此基础上完成了 Kotlin 化的整体重写。
 
 ## 贡献
 

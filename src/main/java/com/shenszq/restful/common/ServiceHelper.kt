@@ -14,9 +14,9 @@ object ServiceHelper {
         )
     )
 
-    fun buildRestServiceItemListUsingResolver(project: Project): List<RestServiceItem> = distinctItems(
+    fun buildRestServiceItemListUsingResolver(project: Project, methodLevelScan: Boolean = false): List<RestServiceItem> = distinctItems(
         listOf(
-            SpringResolver(project).findAllSupportedServiceItemsInProject(),
+            SpringResolver(project, methodLevelScan).findAllSupportedServiceItemsInProject(),
             JaxrsResolver(project).findAllSupportedServiceItemsInProject()
         )
     )

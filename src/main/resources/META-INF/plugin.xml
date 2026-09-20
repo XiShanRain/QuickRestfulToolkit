@@ -20,6 +20,11 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.shenszq.restful.navigation.action.GotoRequestMappingConfiguration"/>
+        <applicationConfigurable
+                id="com.shenszq.restful.settings"
+                parentId="tools"
+                instance="com.shenszq.restful.settings.RestfulToolkitConfigurable"
+                displayName="QuickRestfulToolkit"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">

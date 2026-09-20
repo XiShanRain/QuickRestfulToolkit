@@ -21,6 +21,11 @@ class RestServiceItem(
     private val locationString: String? = ReadAction.compute<String?, RuntimeException> { buildLocationString(psiElement, module?.name) }
     val dedupKey: String = ReadAction.compute<String, RuntimeException> { buildDedupKey(psiElement, url, method) }
 
+    /** 该条目所在文件的绝对路径；用于计算“索引已覆盖文件集”，供补漏扫描做差集。 */
+    val filePath: String? = ReadAction.compute<String?, RuntimeException> {
+        psiElement.containingFile?.virtualFile?.path
+    }
+
     override fun getName(): String? = url
     override fun getPresentation(): ItemPresentation? = RestServiceItemPresentation()
 
@@ -41,7 +46,9 @@ class RestServiceItem(
 
     private inner class RestServiceItemPresentation : ItemPresentation {
         override fun getPresentableText(): String? = url
-        override fun getLocationString(): String? = locationString
+        // 必须用 this@RestServiceItem 显式限定：ItemPresentation 是 Java 接口，其 getLocationString()
+        // 会被 Kotlin 暴露为合成属性 locationString，直接写 locationString 会解析成本方法导致无限递归。
+        override fun getLocationString(): String? = this@RestServiceItem.locationString
         override fun getIcon(unused: Boolean): Icon? = ToolkitIcons.Method.get(method)
     }
 
