@@ -66,6 +66,11 @@ class RestScanService(private val project: Project) : Disposable {
     @Volatile
     private var generation = 0L
 
+    /** 最近一次重建的概况（模式/条目数/耗时），仅供对话框状态行展示。 */
+    @Volatile
+    var lastRebuildInfo: String = ""
+        private set
+
     init {
         val connection = project.messageBus.connect(this)
         connection.subscribe(VirtualFileManager.VFS_CHANGES, SourceChangeListener())
@@ -98,29 +103,16 @@ class RestScanService(private val project: Project) : Disposable {
     }
 
     /**
-     * 项目启动后在后台预热缓存：非阻塞读操作（自动等待索引就绪、可取消），
-     * 完成后在 EDT 上写入缓存。即便未完成或失败，弹窗仍会同步构建，行为无损。
+     * 项目启动后在后台预热缓存：非阻塞读操作（自动等待索引就绪、可取消）。
+     * 统一走 [collectItems]（内部持锁 + 写缓存），避免与弹窗侧的同步构建并发跑
+     * buildAll 而争用 gapItemsByPath 等非线程安全库存。
      */
     fun warmUp() {
         if (!dirty && cachedItems != null) return
         if (!warming.compareAndSet(false, true)) return
-        val startGen = generation
-        ReadAction.nonBlocking<List<RestServiceItem>> { buildAll() }
+        ReadAction.nonBlocking<Unit> { collectItems(false, null) }
             .expireWhen { project.isDisposed }
-            .finishOnUiThread(ModalityState.defaultModalityState()) { list ->
-                try {
-                    synchronized(lock) {
-                        // 期间若有失效/同步重建，则丢弃这份过期结果
-                        if (generation == startGen) {
-                            cachedItems = list
-                            cachedSignature = currentSignature()
-                            dirty = false
-                        }
-                    }
-                } finally {
-                    warming.set(false)
-                }
-            }
+            .finishOnUiThread(ModalityState.any()) { warming.set(false) }
             .submit(ForkJoinPool.commonPool())
     }
 
@@ -145,13 +137,16 @@ class RestScanService(private val project: Project) : Disposable {
     }
 
     private fun buildAll(): List<RestServiceItem> {
+        val startedAt = System.currentTimeMillis()
         val settings = RestfulToolkitSettings.getInstance()
 
         val indexItems = ServiceHelper.buildRestServiceItemListUsingResolver(project, settings.methodLevelScanEnabled)
 
         if (!settings.gapFillEnabled) {
-            LOG.info("[QuickRestfulToolkit] rebuild(index-only) items=${indexItems.size}")
-            return indexItems.distinctBy { it.dedupKey }
+            val items = indexItems.distinctBy { it.dedupKey }
+            lastRebuildInfo = "index-only · ${items.size} items · ${System.currentTimeMillis() - startedAt} ms"
+            LOG.info("[QuickRestfulToolkit] rebuild(index-only) items=${items.size}")
+            return items
         }
 
         val covered = indexItems.mapNotNull { it.filePath }.toHashSet()
@@ -159,11 +154,13 @@ class RestScanService(private val project: Project) : Disposable {
         val gapItems = ArrayList<RestServiceItem>()
         gapItemsByPath.forEach { (path, items) -> if (path !in covered) gapItems.addAll(items) }
 
+        val items = (indexItems + gapItems).distinctBy { it.dedupKey }
+        lastRebuildInfo = "${if (usedDelta) "delta" else "full"} · ${items.size} items · ${System.currentTimeMillis() - startedAt} ms"
         LOG.info(
             "[QuickRestfulToolkit] rebuild index=${indexItems.size} gapFiles=${gapItemsByPath.size} " +
                 "gapItems=${gapItems.size} mode=${if (usedDelta) "delta" else "full"} coveredFiles=${covered.size}"
         )
-        return (indexItems + gapItems).distinctBy { it.dedupKey }
+        return items
     }
 
     /** 重建补漏库存；返回本次是否走了 Everything 增量（用于日志）。 */

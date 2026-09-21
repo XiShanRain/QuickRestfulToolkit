@@ -12,14 +12,24 @@ import com.shenszq.restful.method.HttpMethod
 import javax.swing.Icon
 
 class RestServiceItem(
-    private val psiElement: PsiElement,
+    val psiElement: PsiElement,
     requestMethod: String?,
-    private val url: String,
-    private val module: Module?
+    val url: String,
+    val module: Module?
 ) : NavigationItem {
     val method: HttpMethod? = HttpMethod.getByRequestMethod(requestMethod)
-    private val locationString: String? = ReadAction.compute<String?, RuntimeException> { buildLocationString(psiElement, module?.name) }
+    /** 展示用的“(模块 类#方法)”后缀；供对话框渲染器使用。 */
+    val locationText: String? = ReadAction.compute<String?, RuntimeException> { buildLocationString(psiElement, module?.name) }
+    private val locationString: String? = locationText
     val dedupKey: String = ReadAction.compute<String, RuntimeException> { buildDedupKey(psiElement, url, method) }
+
+    /** 所在模块名；供工具窗口按模块分组（对话框不使用）。 */
+    val moduleName: String? = module?.name
+
+    /** 控制器类简单名（非方法元素时退化为文件名）。 */
+    val className: String? = ReadAction.compute<String?, RuntimeException> {
+        (psiElement as? PsiMethod)?.containingClass?.name ?: psiElement.containingFile?.name
+    }
 
     /** 该条目所在文件的绝对路径；用于计算“索引已覆盖文件集”，供补漏扫描做差集。 */
     val filePath: String? = ReadAction.compute<String?, RuntimeException> {

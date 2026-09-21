@@ -27,6 +27,11 @@
                 parentId="tools"
                 instance="com.shenszq.restful.settings.RestfulToolkitConfigurable"
                 displayName="QuickRestfulToolkit"/>
+        <toolWindow id="QuickRestfulToolkit"
+                    anchor="right"
+                    icon="/icons/service.png"
+                    factoryClass="com.shenszq.restful.navigation.ui.RestServicesToolWindowFactory"
+                    doNotActivateOnStart="true"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
@@ -47,6 +52,12 @@
                     class="com.shenszq.restful.navigation.action.RescanRestAction"
                     text="Rescan REST Mappings"
                     description="Clear cache and re-scan all REST mappings"/>
+            <action id="Toolkit.SwitchSearchUi"
+                    class="com.shenszq.restful.navigation.action.SwitchRestSearchUiAction"
+                    text="Switch REST Search UI (Dialog / Popup)"
+                    description="Toggle the preferred REST search entry between the dialog and the ChooseByName popup">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift SLASH"/>
+            </action>
         </group>
     </actions>
 </idea-plugin>

@@ -14,7 +14,9 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 /**
- * QuickRestfulToolkit 设置页（单一入口，无模式切换）：
+ * QuickRestfulToolkit 设置页：
+ * - 首选搜索 UI（对话框 / 弹层兜底）与窗口内切换、Ctrl+Alt+Shift+/ 全局切换动作同步翻转
+ * - 对话框打开时是否一直显示结果列表
  * - 补漏扫描开关（默认开）
  * - 方法级 mapping 反查（默认关）
  * - 增量缓存开关（默认开）
@@ -29,6 +31,8 @@ class RestfulToolkitConfigurable : Configurable {
     private var gapFillCheck: JBCheckBox? = null
     private var methodLevelCheck: JBCheckBox? = null
     private var cacheCheck: JBCheckBox? = null
+    private var dialogPreferredCheck: JBCheckBox? = null
+    private var alwaysShowListCheck: JBCheckBox? = null
 
     override fun getDisplayName(): String = "QuickRestfulToolkit"
 
@@ -39,6 +43,8 @@ class RestfulToolkitConfigurable : Configurable {
         gapFillCheck = JBCheckBox("为未被索引覆盖的文件启用补漏扫描（推荐）", settings.gapFillEnabled)
         methodLevelCheck = JBCheckBox("额外按方法级 Mapping 注解反查所在类（最大化召回，稍慢）", settings.methodLevelScanEnabled)
         cacheCheck = JBCheckBox("使用增量缓存（按修改时间跳过未变化文件）", settings.useCache)
+        dialogPreferredCheck = JBCheckBox("使用对话框式搜索作为首选入口（取消则回退弹层；可在窗口内 Ctrl+Alt+P / Ctrl+Alt+Shift+/ 同步翻转）", settings.dialogSearchPreferred)
+        alwaysShowListCheck = JBCheckBox("对话框打开时一直显示结果列表（取消则输入后显示）", settings.alwaysShowResultList)
 
         esPathField = JBTextField(RestfulToolkitSettings.getInstance().esPath, 40)
         val browse = JButton("浏览...")
@@ -64,6 +70,8 @@ class RestfulToolkitConfigurable : Configurable {
             ShowSettingsUtil.getInstance().showSettingsDialog(project, "Keymap")
         }
 
+        panel.add(JLabel()); panel.add(dialogPreferredCheck)
+        panel.add(JLabel()); panel.add(alwaysShowListCheck)
         panel.add(JLabel()); panel.add(gapFillCheck)
         panel.add(JLabel()); panel.add(methodLevelCheck)
         panel.add(JLabel()); panel.add(cacheCheck)
@@ -77,6 +85,8 @@ class RestfulToolkitConfigurable : Configurable {
         if (gapFillCheck?.isSelected != settings.gapFillEnabled) return true
         if (methodLevelCheck?.isSelected != settings.methodLevelScanEnabled) return true
         if (cacheCheck?.isSelected != settings.useCache) return true
+        if (dialogPreferredCheck?.isSelected != settings.dialogSearchPreferred) return true
+        if (alwaysShowListCheck?.isSelected != settings.alwaysShowResultList) return true
         if ((esPathField?.text ?: "") != settings.esPath) return true
         return false
     }
@@ -85,6 +95,8 @@ class RestfulToolkitConfigurable : Configurable {
         settings.gapFillEnabled = gapFillCheck?.isSelected == true
         settings.methodLevelScanEnabled = methodLevelCheck?.isSelected == true
         settings.useCache = cacheCheck?.isSelected == true
+        settings.dialogSearchPreferred = dialogPreferredCheck?.isSelected == true
+        settings.alwaysShowResultList = alwaysShowListCheck?.isSelected == true
         settings.esPath = esPathField?.text ?: ""
         // 设置变化后让各项目的缓存失效并后台重建
         ProjectManager.getInstance().openProjects.forEach { project ->
@@ -98,6 +110,8 @@ class RestfulToolkitConfigurable : Configurable {
         gapFillCheck?.isSelected = settings.gapFillEnabled
         methodLevelCheck?.isSelected = settings.methodLevelScanEnabled
         cacheCheck?.isSelected = settings.useCache
+        dialogPreferredCheck?.isSelected = settings.dialogSearchPreferred
+        alwaysShowListCheck?.isSelected = settings.alwaysShowResultList
         esPathField?.text = settings.esPath
     }
 }

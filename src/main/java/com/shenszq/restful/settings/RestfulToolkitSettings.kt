@@ -10,8 +10,11 @@ import java.io.File
 /**
  * 插件全局设置（应用级持久化）。
  *
- * 采用单一入口策略，不再提供“搜索模式切换”：
- * - 主路径始终是增强后的 PSI 索引搜索（含 Feign 接口召回）；
+ * 搜索入口策略：
+ * - [dialogSearchPreferred] 为 true（默认）时 Ctrl+Alt+/ 打开对话框式搜索（首选 UI，
+ *   迁移自 quick-restful 的交互形态）；为 false 时回退到原有 ChooseByName 弹层（兜底）；
+ * - [alwaysShowResultList] 控制对话框打开时是否空查询即展示全量列表（仅作用于对话框，
+ *   弹层由 IDE 框架决定，本来就需输入才出结果）；
  * - [gapFillEnabled] 控制是否对未被索引覆盖的 .java 文件做补漏扫描；
  * - es.exe 仅用于加速补漏阶段的文件枚举，可用则用、不可用自动回退文件系统递归。
  */
@@ -24,6 +27,8 @@ class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.S
         var methodLevelScanEnabled: Boolean = false
         var useCache: Boolean = true
         var esPath: String = ""
+        var dialogSearchPreferred: Boolean = true
+        var alwaysShowResultList: Boolean = false
     }
 
     private var myState = State()
@@ -50,6 +55,16 @@ class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.S
     var esPath: String
         get() = myState.esPath.ifBlank { detectEsExecutable() ?: "" }
         set(value) { myState.esPath = value }
+
+    /** 是否以对话框搜索为首选入口（false 时回退原有 ChooseByName 弹层）。 */
+    var dialogSearchPreferred: Boolean
+        get() = myState.dialogSearchPreferred
+        set(value) { myState.dialogSearchPreferred = value }
+
+    /** 对话框打开时是否空查询即展示全量列表（默认关，输入后显示）。 */
+    var alwaysShowResultList: Boolean
+        get() = myState.alwaysShowResultList
+        set(value) { myState.alwaysShowResultList = value }
 
     companion object {
         fun getInstance(): RestfulToolkitSettings = service()
