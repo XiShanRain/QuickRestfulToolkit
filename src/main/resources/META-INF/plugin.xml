@@ -20,6 +20,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.shenszq.restful.navigation.action.GotoRequestMappingConfiguration"/>
+        <postStartupActivity implementation="com.shenszq.restful.scan.RestScanStartupActivity"/>
+        <notificationGroup id="QuickRestfulToolkit" displayType="BALLOON"/>
         <applicationConfigurable
                 id="com.shenszq.restful.settings"
                 parentId="tools"
@@ -32,12 +34,19 @@
     </extensions>
 
     <actions>
-        <action id="Toolkit.GotoService"
-                class="com.shenszq.restful.navigation.action.GotoRequestMappingAction"
-                text="Go to REST Service"
-                description="Jump to a REST controller method by URL"
-                icon="AllIcons.Actions.Search">
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SLASH"/>
-        </action>
+        <group id="QuickRestfulToolkit.Tools" text="QuickRestfulToolkit" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="Toolkit.GotoService"
+                    class="com.shenszq.restful.navigation.action.GotoRequestMappingAction"
+                    text="Go to REST Service"
+                    description="Jump to a REST controller method by URL"
+                    icon="AllIcons.Actions.Search">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SLASH"/>
+            </action>
+            <action id="Toolkit.RescanRest"
+                    class="com.shenszq.restful.navigation.action.RescanRestAction"
+                    text="Rescan REST Mappings"
+                    description="Clear cache and re-scan all REST mappings"/>
+        </group>
     </actions>
 </idea-plugin>
