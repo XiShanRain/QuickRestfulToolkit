@@ -33,6 +33,7 @@ class RestfulToolkitConfigurable : Configurable {
     private var cacheCheck: JBCheckBox? = null
     private var dialogPreferredCheck: JBCheckBox? = null
     private var alwaysShowListCheck: JBCheckBox? = null
+    private var maxVisibleCombo: javax.swing.JComboBox<Int>? = null
 
     override fun getDisplayName(): String = "QuickRestfulToolkit"
 
@@ -45,6 +46,12 @@ class RestfulToolkitConfigurable : Configurable {
         cacheCheck = JBCheckBox("使用增量缓存（按修改时间跳过未变化文件）", settings.useCache)
         dialogPreferredCheck = JBCheckBox("使用对话框式搜索作为首选入口（取消则回退弹层；可在窗口内 Ctrl+Alt+P / Ctrl+Alt+Shift+/ 同步翻转）", settings.dialogSearchPreferred)
         alwaysShowListCheck = JBCheckBox("对话框打开时一直显示结果列表（取消则输入后显示）", settings.alwaysShowResultList)
+
+        val visibleOptions = listOf(10, 20, 50, 100, 200)
+        val currentMax = settings.maxVisibleResults
+        val options = if (currentMax in visibleOptions) visibleOptions else (visibleOptions + currentMax).sorted()
+        maxVisibleCombo = javax.swing.JComboBox(options.toTypedArray())
+        maxVisibleCombo?.selectedItem = currentMax
 
         esPathField = JBTextField(RestfulToolkitSettings.getInstance().esPath, 40)
         val browse = JButton("浏览...")
@@ -72,6 +79,7 @@ class RestfulToolkitConfigurable : Configurable {
 
         panel.add(JLabel()); panel.add(dialogPreferredCheck)
         panel.add(JLabel()); panel.add(alwaysShowListCheck)
+        panel.add(JLabel("结果列表最多显示:")); panel.add(maxVisibleCombo)
         panel.add(JLabel()); panel.add(gapFillCheck)
         panel.add(JLabel()); panel.add(methodLevelCheck)
         panel.add(JLabel()); panel.add(cacheCheck)
@@ -87,6 +95,7 @@ class RestfulToolkitConfigurable : Configurable {
         if (cacheCheck?.isSelected != settings.useCache) return true
         if (dialogPreferredCheck?.isSelected != settings.dialogSearchPreferred) return true
         if (alwaysShowListCheck?.isSelected != settings.alwaysShowResultList) return true
+        if (maxVisibleCombo?.selectedItem != settings.maxVisibleResults) return true
         if ((esPathField?.text ?: "") != settings.esPath) return true
         return false
     }
@@ -97,6 +106,7 @@ class RestfulToolkitConfigurable : Configurable {
         settings.useCache = cacheCheck?.isSelected == true
         settings.dialogSearchPreferred = dialogPreferredCheck?.isSelected == true
         settings.alwaysShowResultList = alwaysShowListCheck?.isSelected == true
+        (maxVisibleCombo?.selectedItem as? Int)?.let { settings.maxVisibleResults = it }
         settings.esPath = esPathField?.text ?: ""
         // 设置变化后让各项目的缓存失效并后台重建
         ProjectManager.getInstance().openProjects.forEach { project ->
@@ -112,6 +122,7 @@ class RestfulToolkitConfigurable : Configurable {
         cacheCheck?.isSelected = settings.useCache
         dialogPreferredCheck?.isSelected = settings.dialogSearchPreferred
         alwaysShowListCheck?.isSelected = settings.alwaysShowResultList
+        maxVisibleCombo?.selectedItem = settings.maxVisibleResults
         esPathField?.text = settings.esPath
     }
 }

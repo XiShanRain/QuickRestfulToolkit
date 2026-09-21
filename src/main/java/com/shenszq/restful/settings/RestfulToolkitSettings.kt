@@ -29,6 +29,7 @@ class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.S
         var esPath: String = ""
         var dialogSearchPreferred: Boolean = true
         var alwaysShowResultList: Boolean = false
+        var maxVisibleResults: Int = 20
     }
 
     private var myState = State()
@@ -65,6 +66,11 @@ class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.S
     var alwaysShowResultList: Boolean
         get() = myState.alwaysShowResultList
         set(value) { myState.alwaysShowResultList = value }
+
+    /** 对话框结果列表一次最多渲染的条目数（性能保护，默认 20）。 */
+    var maxVisibleResults: Int
+        get() = myState.maxVisibleResults.coerceAtLeast(1)
+        set(value) { myState.maxVisibleResults = value }
 
     companion object {
         fun getInstance(): RestfulToolkitSettings = service()

@@ -6,6 +6,7 @@ object UrlPatternUtils {
     private val SCHEME_HOST = Regex("^(?:[a-zA-Z][a-zA-Z0-9+.-]*://)(?:[^/]+)")
     private val LOCALHOST_HOST = Regex("^localhost(?::\\d+)?(?=/|\$)")
     private val DOMAIN_HOST = Regex("^(?:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+))(?::\\d+)?(?=/|\$)")
+    private val NEVER_MATCH = Regex("(?!)")
 
     fun normalizeUserInput(value: String?): String {
         if (value == null) return ""
@@ -32,6 +33,54 @@ object UrlPatternUtils {
             if (candidate.matches(endpointRegex)) return true
         }
         return false
+    }
+
+    /**
+     * 端点路径的预计算匹配键：归一化原文 + 小写 + 预编译正则。
+     * 列表加载时对每个条目计算一次，之后每轮按键匹配只做纯比较，避免重复归一化/编译正则。
+     */
+    class EndpointKey internal constructor(
+        val normalized: String,
+        val normalizedLower: String,
+        val regex: Regex
+    )
+
+    /** 把用户查询预编译成可复用的匹配器：归一化 + 候选后缀只算一次。 */
+    class QueryMatcher internal constructor(
+        private val matchAll: Boolean,
+        private val candidatesLower: List<String>,
+        private val candidatesRaw: List<String>
+    ) {
+        fun matches(key: EndpointKey): Boolean {
+            if (matchAll) return true
+            val epLower = key.normalizedLower
+            val regex = key.regex
+            for (i in candidatesLower.indices) {
+                val c = candidatesLower[i]
+                if (epLower == c || epLower.contains(c)) return true
+                if (epLower.startsWith("$c/")) return true
+                if (candidatesRaw[i].matches(regex)) return true
+            }
+            return false
+        }
+    }
+
+    fun buildEndpointKey(endpointPath: String): EndpointKey {
+        val normalized = normalizeUserInput(endpointPath)
+        val regex = try {
+            toRegex(normalized)
+        } catch (t: Throwable) {
+            // 非法 {var:type} 之类导致的正则编译失败：退化为“正则永不匹配”，仍保留纯字符串比较能力
+            NEVER_MATCH
+        }
+        return EndpointKey(normalized, normalized.lowercase(Locale.ROOT), regex)
+    }
+
+    fun compileQuery(userPattern: String): QueryMatcher {
+        val input = normalizeUserInput(userPattern)
+        if (input == "/") return QueryMatcher(true, emptyList(), emptyList())
+        val candidates = buildCandidatePaths(input)
+        return QueryMatcher(false, candidates.map { it.lowercase(Locale.ROOT) }, candidates)
     }
 
     private fun stripQuotes(value: String): String =
