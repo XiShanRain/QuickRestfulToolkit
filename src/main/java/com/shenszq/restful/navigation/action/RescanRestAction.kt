@@ -21,9 +21,9 @@ class RescanRestAction : AnAction(), DumbAware {
             service.warmUp()
         }
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("QuickRestfulToolkit")
+            .getNotificationGroup("RestfulRadar")
             .createNotification(
-                "QuickRestfulToolkit: 已清空缓存，正在后台重新全量扫描 REST 映射。",
+                "RestfulRadar: 已清空缓存，正在后台重新全量扫描 REST 映射。",
                 NotificationType.INFORMATION
             )
             .notify(project)

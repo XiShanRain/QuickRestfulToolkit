@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>com.shenszq.restful.toolkit.plus</id>
-    <name>QuickRestfulToolkit</name>
+    <id>com.shenszq.restful.restfulradar</id>
+    <name>RestfulRadar</name>
     <vendor email="support@example.com">shenszq</vendor>
 
     <description><![CDATA[
@@ -21,13 +21,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.shenszq.restful.navigation.action.GotoRequestMappingConfiguration"/>
         <postStartupActivity implementation="com.shenszq.restful.scan.RestScanStartupActivity"/>
-        <notificationGroup id="QuickRestfulToolkit" displayType="BALLOON"/>
+        <notificationGroup id="RestfulRadar" displayType="BALLOON"/>
         <applicationConfigurable
                 id="com.shenszq.restful.settings"
                 parentId="tools"
                 instance="com.shenszq.restful.settings.RestfulToolkitConfigurable"
-                displayName="QuickRestfulToolkit"/>
-        <toolWindow id="QuickRestfulToolkit"
+                displayName="RestfulRadar"/>
+        <toolWindow id="RestfulRadar"
                     anchor="right"
                     icon="/icons/service.png"
                     factoryClass="com.shenszq.restful.navigation.ui.RestServicesToolWindowFactory"
@@ -39,7 +39,7 @@
     </extensions>
 
     <actions>
-        <group id="QuickRestfulToolkit.Tools" text="QuickRestfulToolkit" popup="true">
+        <group id="RestfulRadar.Tools" text="RestfulRadar" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <action id="Toolkit.GotoService"
                     class="com.shenszq.restful.navigation.action.GotoRequestMappingAction"

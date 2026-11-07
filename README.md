@@ -1,4 +1,4 @@
-# QuickRestfulToolkit
+# RestfulRadar
 
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ%20IDEA-2024.3%2B-blue)
 ![JDK](https://img.shields.io/badge/JDK-21-orange)
@@ -6,9 +6,9 @@
 
 一个用于 IntelliJ IDEA 的插件，支持根据请求 URL 或路径快速跳转到对应的后端 REST Controller 方法。
 
-QuickRestfulToolkit 是开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 版）的 **Kotlin 复刻重写版**。它保留了原项目的核心能力与交互方式，并全程改用 Kotlin 实现，目标很简单：当你已经知道接口地址时，尽可能快地帮你定位到服务端入口代码。插件支持 Spring MVC / Spring Boot、JAX-RS，同时兼容 Java 与 Kotlin 控制器项目。
+RestfulRadar 是开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 版）的 **Kotlin 复刻重写版**。它保留了原项目的核心能力与交互方式，并全程改用 Kotlin 实现，目标很简单：当你已经知道接口地址时，尽可能快地帮你定位到服务端入口代码。插件支持 Spring MVC / Spring Boot、JAX-RS，同时兼容 Java 与 Kotlin 控制器项目。
 
-> 关于名称：`Quick` 取自"快速定位"之意——本插件的核心目标就是当你已知接口地址时，能尽快跳转到服务端入口代码。它是 Java 版 RestfulToolkitPlus 的 Kotlin 复刻重写版。
+> 关于名称：`RestfulRadar` 中的 `Radar` 取自"雷达扫描"之意——本插件会扫描项目中的全部 REST 接口，并支持当你已知接口地址时，尽快跳转到服务端入口代码。它是 Java 版 RestfulToolkitPlus 的 Kotlin 复刻重写版。
 
 ## 功能特性
 
@@ -32,7 +32,7 @@ QuickRestfulToolkit 是开源项目 [RestfulToolkitPlus](https://github.com/shen
 - 你只知道某个接口路径，但不知道它属于哪个模块、哪个类
 - 项目是多模块结构，且同时混用了 Java、Kotlin、Spring 或 JAX-RS
 
-QuickRestfulToolkit 就是为这种场景准备的。
+RestfulRadar 就是为这种场景准备的。
 
 ## 安装方式
 
@@ -53,7 +53,7 @@ gradlew.bat buildPlugin
 2. 构建完成后，插件包会生成在：
 
 ```text
-build/distributions/QuickRestfulToolkit-<version>.zip
+build/distributions/RestfulRadar-<version>.zip
 ```
 
 3. 在 IntelliJ IDEA 中安装：
@@ -214,7 +214,7 @@ src/main/resources/META-INF/
 
 ## 致谢
 
-本项目复刻自 GitHub 开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 实现），感谢其提供的设计思路与功能基线。QuickRestfulToolkit 在此基础上完成了 Kotlin 化的整体重写。
+本项目复刻自 GitHub 开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 实现），感谢其提供的设计思路与功能基线。RestfulRadar 在此基础上完成了 Kotlin 化的整体重写。
 
 ## 贡献
 

@@ -145,7 +145,7 @@ class RestScanService(private val project: Project) : Disposable {
         if (!settings.gapFillEnabled) {
             val items = indexItems.distinctBy { it.dedupKey }
             lastRebuildInfo = "index-only · ${items.size} items · ${System.currentTimeMillis() - startedAt} ms"
-            LOG.info("[QuickRestfulToolkit] rebuild(index-only) items=${items.size}")
+            LOG.info("[RestfulRadar] rebuild(index-only) items=${items.size}")
             return items
         }
 
@@ -157,7 +157,7 @@ class RestScanService(private val project: Project) : Disposable {
         val items = (indexItems + gapItems).distinctBy { it.dedupKey }
         lastRebuildInfo = "${if (usedDelta) "delta" else "full"} · ${items.size} items · ${System.currentTimeMillis() - startedAt} ms"
         LOG.info(
-            "[QuickRestfulToolkit] rebuild index=${indexItems.size} gapFiles=${gapItemsByPath.size} " +
+            "[RestfulRadar] rebuild index=${indexItems.size} gapFiles=${gapItemsByPath.size} " +
                 "gapItems=${gapItems.size} mode=${if (usedDelta) "delta" else "full"} coveredFiles=${covered.size}"
         )
         return items
@@ -242,7 +242,7 @@ class RestScanService(private val project: Project) : Disposable {
             }
             if (relevant && !dirty) {
                 invalidate()
-                LOG.debug("[QuickRestfulToolkit] source changed, cache invalidated")
+                LOG.debug("[RestfulRadar] source changed, cache invalidated")
             }
         }
     }

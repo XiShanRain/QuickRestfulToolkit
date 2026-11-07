@@ -24,7 +24,7 @@ class GotoRequestMappingAction : GotoActionBase(), DumbAware {
         val project = e.project
         val dialogPreferred = RestfulToolkitSettings.getInstance().dialogSearchPreferred
         // 入口日志：排查“热键无反应”时用于区分“动作未被调用”与“动作被调用但窗口未生效”。
-        LOG.info("[QuickRestfulToolkit] gotoActionPerformed: project=${project?.name}, preferred=${if (dialogPreferred) "dialog" else "popup"}")
+        LOG.info("[RestfulRadar] gotoActionPerformed: project=${project?.name}, preferred=${if (dialogPreferred) "dialog" else "popup"}")
         if (project == null) return
         if (dialogPreferred) {
             openDialog(project, tryFindCopiedUrl())
@@ -51,7 +51,7 @@ class GotoRequestMappingAction : GotoActionBase(), DumbAware {
             clearMyInActionIfMine()
             return
         }
-        LOG.info("[QuickRestfulToolkit] openDialog: create + show")
+        LOG.info("[RestfulRadar] openDialog: create + show")
         val dialog = RestSearchDialog(project, initialText)
         val confirmed = try {
             // 同步进入模态循环（平台动作的标准做法）。不要改用 invokeLater(ModalityState.any()) 推迟：
@@ -67,7 +67,7 @@ class GotoRequestMappingAction : GotoActionBase(), DumbAware {
             // （ActionManagerImplKt.tryToExecuteNow）在 isEnabled 检查处静默跳过（无日志无异常）。
             clearMyInActionIfMine()
         }
-        LOG.info("[QuickRestfulToolkit] openDialog: modal loop exited, confirmed=$confirmed, target=${dialog.chosenItem?.url}")
+        LOG.info("[RestfulRadar] openDialog: modal loop exited, confirmed=$confirmed, target=${dialog.chosenItem?.url}")
         // 导航必须在模态循环完全退出之后执行：不要在对话框 doOKAction 内 close() 后立即导航。
         if (confirmed) dialog.chosenItem?.navigate(true)
     }

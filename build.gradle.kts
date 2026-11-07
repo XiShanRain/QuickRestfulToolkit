@@ -1,6 +1,8 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+
 plugins {
     id("java")
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.2.20"
     id("org.jetbrains.intellij.platform") version "2.10.2"
 }
 
@@ -16,7 +18,9 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdea("2024.3.6")
+        // 编译/沙箱目标：用 Community 版 2024.3（编译下限 = 兼容下限），避免 IU 沙箱每次启动弹未激活提示。
+        // 本插件仅依赖 Java/Properties/YAML/Kotlin bundled 插件，IC 全部具备；253+ 兼容性由下方 verifier 矩阵兼顾。
+        intellijIdeaCommunity("2024.3")
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
         bundledPlugin("com.intellij.java")
         bundledPlugin("com.intellij.properties")
@@ -38,6 +42,17 @@ intellijPlatform {
             Migrated from Java to Kotlin.
         """.trimIndent()
     }
+
+    // Plugin Verifier 版本矩阵：编译下限 2024.3，验证 2024.3 → 2026.3 二进制兼容性（verifyPlugin 任务）
+    pluginVerification {
+        ides {
+            // IC 仅存在于 252 及更早；253+ 使用 IntellijIdea（统一发行版）
+            create(IntelliJPlatformType.IntellijIdeaCommunity, "2024.3")
+            create(IntelliJPlatformType.IntellijIdeaCommunity, "2025.1")
+            create(IntelliJPlatformType.IntellijIdea, "2025.3")
+            create(IntelliJPlatformType.IntellijIdea, "2026.3")
+        }
+    }
 }
 
 sourceSets {
@@ -47,9 +62,9 @@ sourceSets {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "21"
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+        freeCompilerArgs.add("-Xjsr305=strict")
     }
 }
 

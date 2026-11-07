@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 当前项目转换自Java项目,路径是: D:\bqyHome\dev_code\IdeaProjects-plugins\first-plugin\RestfulToolkitPlus-master
-IntelliJ IDEA plugin **QuickRestfulToolkit** — enables jumping from a URL path to the matching REST controller method. Supports Spring MVC / Spring Boot and JAX-RS, written in Kotlin, targeting IntelliJ IDEA 2024.3+.
+IntelliJ IDEA plugin **RestfulRadar** — enables jumping from a URL path to the matching REST controller method. Supports Spring MVC / Spring Boot and JAX-RS, written in Kotlin, targeting IntelliJ IDEA 2024.3+.
 
 ## Build & Run Commands
 
