@@ -20,6 +20,10 @@
             <li>Optionally limit the search to the current module.</li>
             <li>Reuses the text selected in the editor or the URL in the clipboard as the initial query.</li>
             <li>Choose a modal dialog or a right-side tool window as the default search UI.</li>
+            <li>Optional Windows acceleration with Everything (<code>es.exe</code>): project files are enumerated
+            through Everything, and a rescan re-parses only the files changed since the previous scan
+            (<code>dm:</code> query). When <code>es.exe</code> is not configured or cannot be detected, the plugin
+            automatically falls back to the IDE index and behaves exactly as before.</li>
         </ul>
 
         <h4>How to use</h4>
@@ -44,18 +48,23 @@
 
         <h4>Settings</h4>
         <p>Under <b>Settings | Tools | RestfulRadar</b> you can choose the window opened by <code>Ctrl+Alt+/</code>
-        (dialog or right-side tool window) and the maximum number of results shown in the list.</p>
+        (dialog or right-side tool window), the maximum number of results shown in the list, and the path to
+        <code>es.exe</code>. Leave the <code>es.exe</code> path empty to auto-detect it (from <code>PATH</code> or
+        the default Everything installation directory). Everything is optional: without it the plugin still works,
+        scans just take longer.</p>
 
         <h4>Compatibility</h4>
         <ul>
             <li>IntelliJ IDEA 2024.3 (build 243) and later, up to 2026.3.</li>
             <li>Uses the bundled Java, Kotlin, YAML and Properties plugins.</li>
             <li>No runtime dependency on Spring or JAX-RS libraries.</li>
+            <li>Everything (<code>es.exe</code>) acceleration is available on Windows only; other platforms use the
+            IDE index automatically.</li>
         </ul>
 
         <h4>License</h4>
         <p>Apache License 2.0. Source code and issue tracker:
-        <a href="https://github.com/XiShanRain/QuickRestfulToolkit">github.com/XiShanRain/QuickRestfulToolkit</a></p>
+        <a href="https://github.com/XiShanRain/RestfulRadar">github.com/XiShanRain/RestfulRadar</a></p>
 
         <hr>
         <h3>RestfulRadar 使用说明（中文）</h3>
@@ -71,6 +80,9 @@
             <li>支持只搜索当前模块。</li>
             <li>优先复用编辑器中选中的文本或剪贴板中的 URL 作为初始搜索内容。</li>
             <li>可选模态对话框或右侧工具窗口作为默认搜索界面。</li>
+            <li>可选 Windows 加速：配置 Everything 命令行 <code>es.exe</code> 后，插件借助 Everything 枚举项目文件，
+            并可按修改时间（<code>dm:</code> 查询）只重新解析上次扫描后发生变化的文件，大幅缩短增量刷新耗时；
+            未配置或检测不到 <code>es.exe</code> 时自动回退到 IDEA 索引，功能不受影响。</li>
         </ul>
 
         <h4>使用步骤</h4>
@@ -94,14 +106,16 @@
         </ul>
 
         <h4>设置</h4>
-        <p>在 <b>Settings | Tools | RestfulRadar</b> 中可选择 <code>Ctrl+Alt+/</code> 打开的窗口（对话框或右侧工具窗口），
-        以及结果列表的最大显示条数。</p>
+        <p>在 <b>Settings | Tools | RestfulRadar</b> 中可选择 <code>Ctrl+Alt+/</code> 打开的窗口（对话框或右侧工具窗口）、
+        结果列表的最大显示条数，以及 <code>es.exe</code> 路径。es.exe 路径留空时会自动检测（PATH 与 Everything
+        默认安装目录）；未安装 Everything 时插件照常工作，仅扫描耗时略长。</p>
 
         <h4>兼容性</h4>
         <ul>
             <li>IntelliJ IDEA 2024.3（build 243）及以上，最高支持到 2026.3。</li>
             <li>依赖内置的 Java、Kotlin、YAML 与 Properties 插件。</li>
             <li>不依赖 Spring 或 JAX-RS 运行库。</li>
+            <li>Everything（<code>es.exe</code>）加速仅在 Windows 上生效，其它平台自动使用 IDEA 索引。</li>
         </ul>
     ]]></description>
 
