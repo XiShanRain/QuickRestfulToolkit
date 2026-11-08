@@ -24,15 +24,24 @@ object UrlPatternUtils {
         val endpoint = normalizeUserInput(endpointPath)
         val input = normalizeUserInput(userPattern)
         if (input == "/") return true
-        val endpointLower = endpoint.lowercase(Locale.ROOT)
-        val endpointRegex = toRegex(endpoint)
-        for (candidate in buildCandidatePaths(input)) {
-            val candidateLower = candidate.lowercase(Locale.ROOT)
-            if (endpointLower == candidateLower || endpointLower.contains(candidateLower)) return true
-            if (endpointLower.startsWith("$candidateLower/")) return true
-            if (candidate.matches(endpointRegex)) return true
+        val epLower = endpoint.lowercase(Locale.ROOT)
+        val inputLower = input.lowercase(Locale.ROOT)
+        // 根路径端点 "/"（如 @RequestMapping("/")）只在空/根查询（上面的 matchAll）时展示，
+        // 否则任意查询都以 '/' 起头并包含 '/'，反向包含会把它误命中。
+        if (epLower == "/") return false
+        // 双向“分段连续包含”：
+        //  - endpoint 含 input（endpoint 前/后有额外分段，含末段前缀式输入如 /api/us 命中 /api/users/1）
+        //  - input 含 endpoint（input 带多余前缀，如 context-root：/mftcc/label/x 命中 /label/x）
+        // 二者都以 '/' 起头，天然保证按段边界对齐，不会把多段查询拆成裸末段而误命中。
+        if (epLower == inputLower || epLower.contains(inputLower)) return true
+        if (inputLower.contains(epLower)) return true
+        // 模板端点（含 {var} / {var:regex}）：用编译好的正则匹配原始输入
+        val regex = try {
+            toRegex(endpoint)
+        } catch (t: Throwable) {
+            NEVER_MATCH
         }
-        return false
+        return input.matches(regex)
     }
 
     /**
@@ -45,23 +54,24 @@ object UrlPatternUtils {
         val regex: Regex
     )
 
-    /** 把用户查询预编译成可复用的匹配器：归一化 + 候选后缀只算一次。 */
+    /**
+     * 把用户查询预编译成可复用的匹配器：归一化只算一次。
+     * 匹配采用双向分段连续包含（endpoint 含 query 或 query 含 endpoint）+ 模板正则，
+     * 热路径只做廉价的字符串包含比较，不再拆后缀、不再编译正则。
+     */
     class QueryMatcher internal constructor(
         private val matchAll: Boolean,
-        private val candidatesLower: List<String>,
-        private val candidatesRaw: List<String>
+        private val patternLower: String,
+        private val patternRaw: String
     ) {
         fun matches(key: EndpointKey): Boolean {
             if (matchAll) return true
             val epLower = key.normalizedLower
-            val regex = key.regex
-            for (i in candidatesLower.indices) {
-                val c = candidatesLower[i]
-                if (epLower == c || epLower.contains(c)) return true
-                if (epLower.startsWith("$c/")) return true
-                if (candidatesRaw[i].matches(regex)) return true
-            }
-            return false
+            // 根路径端点 "/" 不参与具体查询匹配（见 matches(...) 中的同规则说明）
+            if (epLower == "/") return false
+            if (epLower == patternLower || epLower.contains(patternLower)) return true
+            if (patternLower.contains(epLower)) return true
+            return patternRaw.matches(key.regex)
         }
     }
 
@@ -78,9 +88,8 @@ object UrlPatternUtils {
 
     fun compileQuery(userPattern: String): QueryMatcher {
         val input = normalizeUserInput(userPattern)
-        if (input == "/") return QueryMatcher(true, emptyList(), emptyList())
-        val candidates = buildCandidatePaths(input)
-        return QueryMatcher(false, candidates.map { it.lowercase(Locale.ROOT) }, candidates)
+        if (input == "/") return QueryMatcher(true, "/", input)
+        return QueryMatcher(false, input.lowercase(Locale.ROOT), input)
     }
 
     private fun stripQuotes(value: String): String =
@@ -133,26 +142,5 @@ object UrlPatternUtils {
         }
         regex.append('$')
         return Regex(regex.toString())
-    }
-
-    private fun buildCandidatePaths(input: String): List<String> {
-        val candidates = linkedSetOf<String>()
-        candidates.add(input)
-        val trimmed = if (input.startsWith("/")) input.substring(1) else input
-        if (trimmed.isEmpty()) return listOf("/")
-        val segments = trimmed.split("/").toTypedArray()
-        for (i in 1 until segments.size) {
-            val suffix = joinNonEmpty(segments, i)
-            if (suffix.isNotEmpty()) candidates.add("/$suffix")
-        }
-        return candidates.toList()
-    }
-
-    private fun joinNonEmpty(segments: Array<String>, start: Int): String = buildString {
-        for (i in start until segments.size) {
-            if (segments[i].isEmpty()) continue
-            if (length > 0) append('/')
-            append(segments[i])
-        }
     }
 }

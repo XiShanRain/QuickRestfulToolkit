@@ -2,6 +2,7 @@ package com.shenszq.restful.scan
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
@@ -136,6 +137,9 @@ class RestFileScanner(private val project: Project) {
      */
     fun parsePsiFile(psiFile: PsiJavaFile): List<RestServiceItem> {
         val items = mutableListOf<RestServiceItem>()
+        // 文件不属于任何已注册 source root 时仍可能在某个 Module 的 content root 下，
+        // 反查一次供工具窗口分组；确实不属于任何模块时为 null（归“未归属模块”）。
+        val fileModule = ModuleUtil.findModuleForFile(psiFile.virtualFile, project)
         for (clazz in psiFile.classes) {
             val isController = isControllerClass(clazz)
             val classPrefix = getClassRequestMappingPath(clazz)
@@ -149,7 +153,7 @@ class RestFileScanner(private val project: Project) {
                     val methodPaths = extractPaths(annotation).ifEmpty { listOf("/") }
                     val httpMethod = resolveHttpMethod(annotation)
                     for (methodPath in methodPaths) {
-                        items.add(RestServiceItem(method, httpMethod, normalizePath(prefix, methodPath), null))
+                        items.add(RestServiceItem(method, httpMethod, normalizePath(prefix, methodPath), fileModule))
                     }
                 }
             }

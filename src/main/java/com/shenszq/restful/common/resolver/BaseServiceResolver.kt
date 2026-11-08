@@ -1,6 +1,7 @@
 package com.shenszq.restful.common.resolver
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
@@ -29,6 +30,9 @@ abstract class BaseServiceResolver : ServiceResolver {
         if (!classPath.endsWith("/")) classPath = "$classPath/"
         var methodPath = requestPath.path
         if (methodPath.startsWith("/")) methodPath = methodPath.substring(1)
-        return RestServiceItem(psiElement, requestPath.method, "$classPath$methodPath", myModule)
+        // 项目级扫描时 myModule 为 null：按元素所在文件反查其 IDEA Module，
+        // 让工具窗口能正确按模块分组（否则全部落入“未归属模块”）。
+        val itemModule = myModule ?: ModuleUtil.findModuleForPsiElement(psiElement)
+        return RestServiceItem(psiElement, requestPath.method, "$classPath$methodPath", itemModule)
     }
 }
