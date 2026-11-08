@@ -11,8 +11,12 @@ import java.io.File
  * 插件全局设置（应用级持久化）。
  *
  * 搜索入口策略：
- * - [dialogSearchPreferred] 为 true（默认）时 Ctrl+Alt+/ 打开对话框式搜索（首选 UI，
- *   迁移自 quick-restful 的交互形态）；为 false 时回退到原有 ChooseByName 弹层（兜底）；
+ * - [dialogSearchPreferred] 表示 Ctrl+Alt+/ **默认打开的窗口**（设置页的“默认窗口”选项）：
+ *   为 true 用对话框式搜索（迁移自 quick-restful 的交互形态），为 false 用右侧 RestfulRadar
+ *   工具窗口（按模块浏览）；
+ * - [alternateSearchUiOnInvoke] 为 true 时，Ctrl+Alt+/ **每次按下都在「模态对话框」与
+ *   「右侧 RestfulRadar 工具窗口」之间交替**（按一次面板、再按一次对话框…），此时忽略
+ *   默认窗口；默认关闭，即默认行为是“固定打开默认窗口”；
  * - [alwaysShowResultList] 控制对话框打开时是否空查询即展示全量列表（仅作用于对话框，
  *   弹层由 IDE 框架决定，本来就需输入才出结果）；
  * - [gapFillEnabled] 控制是否对未被索引覆盖的 .java 文件做补漏扫描；
@@ -28,6 +32,7 @@ class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.S
         var useCache: Boolean = true
         var esPath: String = ""
         var dialogSearchPreferred: Boolean = true
+        var alternateSearchUiOnInvoke: Boolean = false
         var alwaysShowResultList: Boolean = false
         var maxVisibleResults: Int = 20
     }
@@ -57,7 +62,15 @@ class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.S
         get() = myState.esPath.ifBlank { detectEsExecutable() ?: "" }
         set(value) { myState.esPath = value }
 
-    /** 是否以对话框搜索为首选入口（false 时回退原有 ChooseByName 弹层）。 */
+    /**
+     * Ctrl+Alt+/ 是否每次按下都在「模态对话框」与「右侧 RestfulRadar 工具窗口」之间交替（默认关）。
+     * 关闭时（默认）由 [dialogSearchPreferred] 决定“默认窗口”；开启时忽略它，每次翻转。
+     */
+    var alternateSearchUiOnInvoke: Boolean
+        get() = myState.alternateSearchUiOnInvoke
+        set(value) { myState.alternateSearchUiOnInvoke = value }
+
+    /** 默认打开的窗口：true 用对话框，false 用右侧 RestfulRadar 工具窗口（交替关闭时生效）。 */
     var dialogSearchPreferred: Boolean
         get() = myState.dialogSearchPreferred
         set(value) { myState.dialogSearchPreferred = value }

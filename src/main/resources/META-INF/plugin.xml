@@ -54,12 +54,12 @@
                     description="Clear cache and re-scan all REST mappings"/>
             <action id="Toolkit.SwitchSearchUi"
                     class="com.shenszq.restful.navigation.action.SwitchRestSearchUiAction"
-                    text="Switch REST Search UI (Dialog / Popup)"
-                    description="Toggle the preferred REST search entry between the dialog and the ChooseByName popup">
+                    text="Switch REST Search UI (Dialog / Right Panel)"
+                    description="Toggle the preferred REST search entry between the dialog and the right RestfulRadar tool window">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift SLASH"/>
             </action>
             <!--
-                两个独立入口动作：始终打开对话框 / 始终打开弹层，不受首选 UI 偏好影响。
+                两个独立入口动作：始终打开对话框 / 始终打开 IDE 标准弹层，不受首选形态偏好影响。
                 故意不写默认 <keyboard-shortcut>，避免与现有键位及 IDE 自带快捷键冲突；
                 用户可在 Settings > Keymap 搜 "REST Service (Dialog)" / "(Popup)" 各自绑定。
             -->

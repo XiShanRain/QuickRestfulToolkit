@@ -45,7 +45,7 @@ import javax.swing.event.DocumentListener
  * - 增量刷新（F5）：[RestScanService.invalidate] 后后台重建，走 Everything dm: 增量；
  * - 全量重新扫描（Ctrl+Enter）：[RestScanService.clearCaches] 后全量重建；
  * - 空查询是否展示全量由 [RestfulToolkitSettings.alwaysShowResultList] 决定；
- * - Ctrl+Alt+P / “弹层搜索”按钮切回 ChooseByName 弹层兜底。
+ * - Ctrl+Alt+P / “右侧面板”按钮切到右侧 RestfulRadar 工具窗口。
  */
 class RestSearchDialog(
     private val project: Project,
@@ -78,7 +78,7 @@ class RestSearchDialog(
 
     private val incrementalButton = JButton("增量刷新")
     private val fullScanButton = JButton("全量重新扫描")
-    private val popupButton = JButton("弹层搜索")
+    private val toolWindowButton = JButton("右侧面板")
 
     init {
         title = "搜索 REST 路径"
@@ -146,11 +146,11 @@ class RestSearchDialog(
         incrementalButton.addActionListener { rebuild(RebuildMode.INCREMENTAL) }
         fullScanButton.toolTipText = "清空缓存并全量扫描（Ctrl+Enter）"
         fullScanButton.addActionListener { rebuild(RebuildMode.FULL) }
-        popupButton.toolTipText = "切换到 ChooseByName 弹层搜索（Ctrl+Alt+P）"
-        popupButton.addActionListener { RestSearchUiSwitch.toggleToPopup(project, this) }
+        toolWindowButton.toolTipText = "切到右侧 RestfulRadar 面板并聚焦过滤框（Ctrl+Alt+P）"
+        toolWindowButton.addActionListener { RestSearchUiSwitch.toggleToToolWindow(project, this) }
         rightPanel.add(incrementalButton)
         rightPanel.add(fullScanButton)
-        rightPanel.add(popupButton)
+        rightPanel.add(toolWindowButton)
         controlRow.add(rightPanel, BorderLayout.EAST)
 
         statusLabel.foreground = java.awt.Color.GRAY
@@ -195,7 +195,7 @@ class RestSearchDialog(
             KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW)
         root.registerKeyboardAction({ rebuild(RebuildMode.FULL) },
             KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW)
-        root.registerKeyboardAction({ RestSearchUiSwitch.toggleToPopup(project, this) },
+        root.registerKeyboardAction({ RestSearchUiSwitch.toggleToToolWindow(project, this) },
             KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK or KeyEvent.ALT_DOWN_MASK),
             JComponent.WHEN_IN_FOCUSED_WINDOW)
         // 输入框 → 列表：普通 ↑/↓ 直接进入结果列表首/末项，弹出后即可仅用上下键选择，

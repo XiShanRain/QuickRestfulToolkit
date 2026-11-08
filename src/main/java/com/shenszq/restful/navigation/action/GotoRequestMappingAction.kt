@@ -6,7 +6,6 @@ import com.intellij.ide.util.gotoByName.ChooseByNamePopupComponent
 import com.intellij.navigation.ChooseByNameContributor
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.ide.CopyPasteManager
@@ -15,15 +14,18 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.shenszq.restful.method.HttpMethod
 import com.shenszq.restful.navigation.ui.RestSearchDialog
+import com.shenszq.restful.navigation.ui.RestServicesToolWindowFactory
 import com.shenszq.restful.settings.RestfulToolkitSettings
 import java.awt.datatransfer.DataFlavor
 
 /**
- * 主搜索入口（默认快捷键 Ctrl+Alt+/）：每次按下在对话框与 ChooseByName 弹层之间**交替**。
+ * 主搜索入口（默认快捷键 Ctrl+Alt+/）：按设置里的「默认窗口」打开对应窗口 ——
+ * 「模态对话框（全项目搜索）」或「右侧 RestfulRadar 面板（按模块浏览）」。
  *
- * 交替行为：每次按下先把“下一次要用的 UI”翻转一次，再按翻转后的结果打开，
- * 于是连续按是 “弹层 → 对话框 → 弹层 …”（初始偏好为对话框时）。
- * 可在设置里关掉交替，改为固定使用某一种 UI。
+ * - 默认（交替关闭）：每次按下都打开默认窗口；
+ * - 开启“每次按下交替”后：先翻转默认窗口再按翻转结果打开，连续按会在两者间轮流。
+ * IDE 自带的 ChooseByName 浮层仍可由 `Go to REST Service (Popup)`
+ * （[OpenRestSearchPopupAction]）单独绑定快捷键使用。
  *
  * 重要重构（A 方案）：本动作**不再继承** `GotoActionBase`。后者用一个跨所有 goto 动作
  * 共享的 `protected static myInAction` 做防重入，只要它非空，`GotoActionBase.update()` 就会把
@@ -39,12 +41,12 @@ class GotoRequestMappingAction : AnAction(), DumbAware {
     override fun actionPerformed(e: AnActionEvent) {
         val project: Project = e.project ?: return
         val useDialog = resolveUiForInvoke()
-        LOG.info("[RestfulRadar] actionPerformed: project=${project.name}, ui=${if (useDialog) "dialog" else "popup"}")
+        LOG.info("[RestfulRadar] actionPerformed: project=${project.name}, ui=${if (useDialog) "dialog" else "toolWindow"}")
         if (project.isDisposed) return
         if (useDialog) {
             openDialog(project, tryFindCopiedUrl())
         } else {
-            openPopup(project, LangDataKeys.MODULE.getData(e.dataContext), tryFindCopiedUrl())
+            openToolWindow(project)
         }
     }
 
@@ -84,6 +86,12 @@ class GotoRequestMappingAction : AnAction(), DumbAware {
         LOG.info("[RestfulRadar] openDialog: modal loop exited, confirmed=$confirmed, target=${dialog.chosenItem?.url}")
         // 导航必须在模态循环完全退出之后执行：不要在对话框 doOKAction 内 close() 后立即导航。
         if (confirmed) dialog.chosenItem?.navigate(true)
+    }
+
+    private fun openToolWindow(project: Project) {
+        if (project.isDisposed) return
+        LOG.info("[RestfulRadar] openToolWindow: activate right panel + focus filter")
+        RestServicesToolWindowFactory.activateAndFocusFilter(project)
     }
 
     private fun openPopup(project: Project, module: Module?, predefinedText: String?) {

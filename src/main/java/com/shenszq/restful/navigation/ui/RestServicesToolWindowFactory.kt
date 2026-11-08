@@ -6,14 +6,18 @@ import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.text.StringUtil
+import com.intellij.openapi.wm.IdeFocusManager
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.SimpleTextAttributes
@@ -28,7 +32,6 @@ import com.shenszq.restful.common.UrlPatternUtils
 import com.shenszq.restful.navigation.action.GotoRequestMappingAction
 import com.shenszq.restful.navigation.action.RestServiceItem
 import com.shenszq.restful.scan.RestScanService
-import com.shenszq.restful.settings.RestfulToolkitSettings
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.datatransfer.StringSelection
@@ -62,9 +65,31 @@ class RestServicesToolWindowFactory : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val panel = RestServicesPanel(project)
+        project.putUserData(REST_PANEL_KEY, panel)
         val content = ContentFactory.getInstance().createContent(panel, null, false)
         content.isCloseable = false
         toolWindow.contentManager.addContent(content)
+    }
+
+    companion object {
+        /** 须与 plugin.xml 中 `<toolWindow id="...">` 保持一致。 */
+        const val TOOL_WINDOW_ID = "RestfulRadar"
+
+        private val REST_PANEL_KEY: Key<RestServicesPanel> = Key.create("RestfulRadar.RestServicesPanel")
+
+        /**
+         * 弹出/展开右侧 RestfulRadar 工具窗口，并把焦点放到 URL 过滤框。
+         * 供主入口 Ctrl+Alt+/ 的“面板形态”使用。窗口不存在时返回 false。
+         */
+        fun activateAndFocusFilter(project: Project): Boolean {
+            val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TOOL_WINDOW_ID) ?: return false
+            toolWindow.activate(null, true)
+            // 内容可能刚被懒加载创建，延后一拍再抢焦点（对话框/编辑器焦点切换也在此时进行）。
+            ApplicationManager.getApplication().invokeLater({
+                project.getUserData(REST_PANEL_KEY)?.focusFilterField()
+            }, ModalityState.nonModal())
+            return true
+        }
     }
 }
 
@@ -93,13 +118,19 @@ private class RestServicesPanel(private val project: Project) : JBPanel<JBPanel<
         reload()
     }
 
+    /** 聚焦 URL 过滤框并全选，便于直接输入替换旧关键字（由主入口 Ctrl+Alt+/ 调用）。 */
+    fun focusFilterField() {
+        IdeFocusManager.getInstance(project).requestFocus(filterField, true)
+        filterField.selectAll()
+    }
+
     private fun createNorthPanel(): JComponent {
         val actionGroup = DefaultActionGroup()
         actionGroup.add(object : AnAction("刷新", "重新扫描 REST 服务", AllIcons.Actions.Refresh) {
             override fun actionPerformed(e: AnActionEvent) = refresh()
         })
         actionGroup.addSeparator()
-        actionGroup.add(object : AnAction("搜索", "打开 REST 服务搜索（对话框/弹层跟随设置）", AllIcons.Actions.Search) {
+        actionGroup.add(object : AnAction("搜索", "在模态对话框中全项目搜索 REST 服务", AllIcons.Actions.Search) {
             override fun actionPerformed(e: AnActionEvent) = openSearch()
         })
         val toolbar = ActionManager.getInstance()
@@ -169,12 +200,13 @@ private class RestServicesPanel(private val project: Project) : JBPanel<JBPanel<
         return menu
     }
 
-    /** 打开全项目搜索：复用主入口动作，跟随"首选 UI"设置（对话框/弹层）。 */
+    /**
+     * 打开全项目搜索对话框。本面板自己已有 URL 过滤框，因此这里固定弹对话框（不再“打开自己”）。
+     */
     private fun openSearch() {
         val action = ActionManager.getInstance().getAction("Toolkit.GotoService") as? GotoRequestMappingAction
             ?: return
-        if (RestfulToolkitSettings.getInstance().dialogSearchPreferred) action.showAsDialog(project)
-        else action.showAsPopup(project)
+        action.showAsDialog(project)
     }
 
     /** 刷新：清缓存后重扫（配置文件缓存一并失效）。 */

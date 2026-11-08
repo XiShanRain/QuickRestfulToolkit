@@ -21,7 +21,7 @@ import javax.swing.border.EmptyBorder
 
 /**
  * RestfulRadar 设置页：
- * - Ctrl+Alt+/ 是否在对话框与弹层之间交替，以及交替关闭时的固定首选 UI
+ * - Ctrl+Alt+/ 默认打开的窗口（对话框 / 右侧 RestfulRadar 面板），以及是否每次按下交替
  * - 对话框打开时是否一直显示结果列表
  * - 补漏扫描开关（默认开）
  * - 方法级 mapping 反查（默认关）
@@ -38,7 +38,7 @@ class RestfulToolkitConfigurable : Configurable {
     private var methodLevelCheck: JBCheckBox? = null
     private var cacheCheck: JBCheckBox? = null
     private var alternateCheck: JBCheckBox? = null
-    private var dialogPreferredCheck: JBCheckBox? = null
+    private var defaultUiCombo: javax.swing.JComboBox<DefaultUi>? = null
     private var alwaysShowListCheck: JBCheckBox? = null
     private var maxVisibleCombo: javax.swing.JComboBox<Int>? = null
 
@@ -52,8 +52,11 @@ class RestfulToolkitConfigurable : Configurable {
         gapFillCheck = JBCheckBox("为未被索引覆盖的文件启用补漏扫描（推荐）", settings.gapFillEnabled)
         methodLevelCheck = JBCheckBox("额外按方法级 Mapping 注解反查所在类（最大化召回，稍慢）", settings.methodLevelScanEnabled)
         cacheCheck = JBCheckBox("使用增量缓存（按修改时间跳过未变化文件）", settings.useCache)
-        alternateCheck = JBCheckBox("Ctrl+Alt+/ 每次按下在对话框与弹层之间交替（取消则固定使用下方首选 UI）", settings.alternateSearchUiOnInvoke)
-        dialogPreferredCheck = JBCheckBox("固定首选 UI 使用对话框式搜索（仅在关闭上方“交替”时生效）", settings.dialogSearchPreferred)
+        alternateCheck = JBCheckBox("每次按下在两种窗口之间交替（开启后忽略上方默认窗口，轮流打开）", settings.alternateSearchUiOnInvoke)
+        defaultUiCombo = javax.swing.JComboBox(DefaultUi.entries.toTypedArray()).apply {
+            selectedItem = currentDefaultUi()
+            toolTipText = "按下 Ctrl+Alt+/ 时首先打开的窗口（关闭交替时每次都用它）"
+        }
         alwaysShowListCheck = JBCheckBox("对话框打开时一直显示结果列表（取消则输入后显示）", settings.alwaysShowResultList)
 
         val visibleOptions = listOf(10, 20, 50, 100, 200)
@@ -88,9 +91,9 @@ class RestfulToolkitConfigurable : Configurable {
         // 说明可分别绑定的入口动作，以及“对话框/弹层各自独立快捷键”的能力。
         val keymapHelp = JLabel(
             "<html>可在 Keymap 中搜索并<em>分别</em>为以下动作指定快捷键，互不影响：<br/>"
-                + "&nbsp;&nbsp;• Go to REST Service（开启交替时每次按下切换 UI）— 默认 Ctrl+Alt+/><br/>"
+                + "&nbsp;&nbsp;• Go to REST Service（按上方“默认窗口”打开）— 默认 Ctrl+Alt+/><br/>"
                 + "&nbsp;&nbsp;• Go to REST Service (Dialog)（始终对话框）— 默认未绑定，可自行添加<br/>"
-                + "&nbsp;&nbsp;• Go to REST Service (Popup)（始终弹层）— 默认未绑定，可自行添加<br/>"
+                + "&nbsp;&nbsp;• Go to REST Service (Popup)（始终 IDE 标准弹层）— 默认未绑定，可自行添加<br/>"
                 + "对话框内结果可直接用 ↑/↓ 选择，Enter 跳转。</html>"
         )
 
@@ -138,8 +141,8 @@ class RestfulToolkitConfigurable : Configurable {
         }
 
         addLabeledRow("插件版本:", JLabel(pluginVersion()), false, 0)
+        addLabeledRow("Ctrl+Alt+/ 默认窗口:", defaultUiCombo!!, false, 8)
         addFullRow(alternateCheck!!, 8)
-        addFullRow(dialogPreferredCheck!!, 8)
         addFullRow(alwaysShowListCheck!!, 8)
         addLabeledRow("结果列表最多显示:", maxVisibleCombo!!, false, 8)
         addFullRow(gapFillCheck!!, 8)
@@ -161,7 +164,7 @@ class RestfulToolkitConfigurable : Configurable {
         if (methodLevelCheck?.isSelected != settings.methodLevelScanEnabled) return true
         if (cacheCheck?.isSelected != settings.useCache) return true
         if (alternateCheck?.isSelected != settings.alternateSearchUiOnInvoke) return true
-        if (dialogPreferredCheck?.isSelected != settings.dialogSearchPreferred) return true
+        if (selectedDefaultUi() != currentDefaultUi()) return true
         if (alwaysShowListCheck?.isSelected != settings.alwaysShowResultList) return true
         if (maxVisibleCombo?.selectedItem != settings.maxVisibleResults) return true
         if ((esPathField?.text ?: "") != settings.esPath) return true
@@ -173,7 +176,7 @@ class RestfulToolkitConfigurable : Configurable {
         settings.methodLevelScanEnabled = methodLevelCheck?.isSelected == true
         settings.useCache = cacheCheck?.isSelected == true
         settings.alternateSearchUiOnInvoke = alternateCheck?.isSelected == true
-        settings.dialogSearchPreferred = dialogPreferredCheck?.isSelected == true
+        settings.dialogSearchPreferred = selectedDefaultUi().dialog
         settings.alwaysShowResultList = alwaysShowListCheck?.isSelected == true
         (maxVisibleCombo?.selectedItem as? Int)?.let { settings.maxVisibleResults = it }
         settings.esPath = esPathField?.text ?: ""
@@ -190,9 +193,23 @@ class RestfulToolkitConfigurable : Configurable {
         methodLevelCheck?.isSelected = settings.methodLevelScanEnabled
         cacheCheck?.isSelected = settings.useCache
         alternateCheck?.isSelected = settings.alternateSearchUiOnInvoke
-        dialogPreferredCheck?.isSelected = settings.dialogSearchPreferred
+        defaultUiCombo?.selectedItem = currentDefaultUi()
         alwaysShowListCheck?.isSelected = settings.alwaysShowResultList
         maxVisibleCombo?.selectedItem = settings.maxVisibleResults
         esPathField?.text = settings.esPath
     }
+
+    /** 设置页的“默认窗口”选项。 */
+    private enum class DefaultUi(val dialog: Boolean, private val label: String) {
+        DIALOG(true, "模态对话框（全项目搜索）"),
+        TOOL_WINDOW(false, "右侧 RestfulRadar 面板（按模块浏览）");
+
+        override fun toString(): String = label
+    }
+
+    private fun currentDefaultUi(): DefaultUi =
+        if (settings.dialogSearchPreferred) DefaultUi.DIALOG else DefaultUi.TOOL_WINDOW
+
+    private fun selectedDefaultUi(): DefaultUi =
+        defaultUiCombo?.selectedItem as? DefaultUi ?: currentDefaultUi()
 }
