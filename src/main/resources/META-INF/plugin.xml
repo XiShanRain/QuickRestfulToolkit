@@ -56,6 +56,53 @@
         <h4>License</h4>
         <p>Apache License 2.0. Source code and issue tracker:
         <a href="https://github.com/XiShanRain/QuickRestfulToolkit">github.com/XiShanRain/QuickRestfulToolkit</a></p>
+
+        <hr>
+        <h3>RestfulRadar 使用说明（中文）</h3>
+        <p>把从浏览器、Postman 或日志中复制的请求地址粘贴进来，RestfulRadar 会扫描项目中的全部 REST 接口，直接跳转到对应的控制器方法。</p>
+
+        <h4>功能特性</h4>
+        <ul>
+            <li>支持完整 URL、相对路径以及纯接口路径搜索。</li>
+            <li>输入自动规范化：自动去掉协议、域名、端口、查询参数和 hash 片段。</li>
+            <li>支持 Spring MVC / Spring Boot 与 JAX-RS 接口扫描。</li>
+            <li>同时支持 Java 与 Kotlin 控制器，兼容 Kotlin K2 模式，不依赖脆弱的 Kotlin 内部索引。</li>
+            <li>支持按 HTTP Method（GET、POST、PUT、DELETE、PATCH 等）过滤结果。</li>
+            <li>支持只搜索当前模块。</li>
+            <li>优先复用编辑器中选中的文本或剪贴板中的 URL 作为初始搜索内容。</li>
+            <li>可选模态对话框或右侧工具窗口作为默认搜索界面。</li>
+        </ul>
+
+        <h4>使用步骤</h4>
+        <ol>
+            <li>按 <code>Ctrl+Alt+/</code>，或在 Find Action 中执行 <b>Go to REST Service</b>。</li>
+            <li>粘贴或输入请求地址，例如 <code>/api/users/42</code> 或
+            <code>https://example.com/api/users/42?active=true</code>。</li>
+            <li>按需选择 HTTP Method，并勾选 <b>Current module</b> 限定搜索范围。</li>
+            <li>按 <code>Enter</code> 或点击结果，跳转到对应的控制器方法。</li>
+        </ol>
+        <p>支持路径变量，例如 <code>/users/{id}</code> 或 <code>/orders/{orderId:\d+}</code>。</p>
+
+        <h4>动作与快捷键</h4>
+        <ul>
+            <li><b>Go to REST Service</b> - <code>Ctrl+Alt+/</code>，按设置中配置的界面打开搜索。</li>
+            <li><b>Switch REST Search UI</b> - <code>Ctrl+Alt+Shift+/</code>，切换首选搜索界面。</li>
+            <li><b>Go to REST Service (Dialog)</b> 与 <b>Go to REST Service (Popup)</b> - 始终打开固定界面，
+            未设默认快捷键，可在 <b>Settings | Keymap</b> 中自行绑定。</li>
+            <li><b>Rescan REST Mappings</b> - 清除缓存并重新扫描项目。</li>
+            <li>所有动作也可从 <b>Tools | RestfulRadar</b> 菜单触发。</li>
+        </ul>
+
+        <h4>设置</h4>
+        <p>在 <b>Settings | Tools | RestfulRadar</b> 中可选择 <code>Ctrl+Alt+/</code> 打开的窗口（对话框或右侧工具窗口），
+        以及结果列表的最大显示条数。</p>
+
+        <h4>兼容性</h4>
+        <ul>
+            <li>IntelliJ IDEA 2024.3（build 243）及以上，最高支持到 2026.3。</li>
+            <li>依赖内置的 Java、Kotlin、YAML 与 Properties 插件。</li>
+            <li>不依赖 Spring 或 JAX-RS 运行库。</li>
+        </ul>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
