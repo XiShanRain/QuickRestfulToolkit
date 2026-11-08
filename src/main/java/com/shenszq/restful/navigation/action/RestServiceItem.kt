@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.navigation.ItemPresentation
 import com.intellij.navigation.NavigationItem
@@ -7,8 +7,8 @@ import com.intellij.openapi.module.Module
 import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
-import com.shenszq.restful.common.ToolkitIcons
-import com.shenszq.restful.method.HttpMethod
+import com.xishanrain.restful.common.ToolkitIcons
+import com.xishanrain.restful.method.HttpMethod
 import javax.swing.Icon
 
 class RestServiceItem(

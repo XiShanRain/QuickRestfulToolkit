@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -7,8 +7,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
-import com.shenszq.restful.navigation.ui.RestSearchUiSwitch
-import com.shenszq.restful.navigation.ui.RestServicesToolWindowFactory
+import com.xishanrain.restful.navigation.ui.RestSearchUiSwitch
+import com.xishanrain.restful.navigation.ui.RestServicesToolWindowFactory
 
 /**
  * 全局切换“首选搜索形态”：模态对话框与右侧 RestfulRadar 工具窗口互为两种形态。

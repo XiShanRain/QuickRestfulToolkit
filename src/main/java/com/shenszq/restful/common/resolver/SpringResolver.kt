@@ -1,4 +1,4 @@
-package com.shenszq.restful.common.resolver
+package com.xishanrain.restful.common.resolver
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
@@ -7,10 +7,10 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedElementsSearch
-import com.shenszq.restful.annotations.SpringControllerAnnotation
-import com.shenszq.restful.annotations.SpringRequestMethodAnnotation
-import com.shenszq.restful.common.spring.RequestMappingAnnotationHelper
-import com.shenszq.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.annotations.SpringControllerAnnotation
+import com.xishanrain.restful.annotations.SpringRequestMethodAnnotation
+import com.xishanrain.restful.common.spring.RequestMappingAnnotationHelper
+import com.xishanrain.restful.navigation.action.RestServiceItem
 
 /**
  * Spring 接口解析器（索引驱动，纯内存查找，不逐文件解析）。

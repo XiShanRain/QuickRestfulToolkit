@@ -1,4 +1,4 @@
-package com.shenszq.restful.common
+package com.xishanrain.restful.common
 
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiAnnotationMemberValue

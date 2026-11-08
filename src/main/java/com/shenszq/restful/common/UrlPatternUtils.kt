@@ -1,4 +1,4 @@
-package com.shenszq.restful.common
+package com.xishanrain.restful.common
 
 import java.util.Locale
 

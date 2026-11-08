@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.ide.util.gotoByName.ChooseByNameFilter
 import com.intellij.ide.util.gotoByName.ChooseByNamePopup
@@ -12,10 +12,10 @@ import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
-import com.shenszq.restful.method.HttpMethod
-import com.shenszq.restful.navigation.ui.RestSearchDialog
-import com.shenszq.restful.navigation.ui.RestServicesToolWindowFactory
-import com.shenszq.restful.settings.RestfulToolkitSettings
+import com.xishanrain.restful.method.HttpMethod
+import com.xishanrain.restful.navigation.ui.RestSearchDialog
+import com.xishanrain.restful.navigation.ui.RestServicesToolWindowFactory
+import com.xishanrain.restful.settings.RestfulToolkitSettings
 import java.awt.datatransfer.DataFlavor
 
 /**

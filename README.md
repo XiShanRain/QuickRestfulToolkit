@@ -6,7 +6,7 @@
 
 一个用于 IntelliJ IDEA 的插件，支持根据请求 URL 或路径快速跳转到对应的后端 REST Controller 方法。
 
-RestfulRadar 是开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 版）的 **Kotlin 复刻重写版**。它保留了原项目的核心能力与交互方式，并全程改用 Kotlin 实现，目标很简单：当你已经知道接口地址时，尽可能快地帮你定位到服务端入口代码。插件支持 Spring MVC / Spring Boot、JAX-RS，同时兼容 Java 与 Kotlin 控制器项目。
+RestfulRadar 是开源项目 [RestfulToolkitPlus](https://github.com/xishanrain/RestfulToolkitPlus)（Java 版）的 **Kotlin 复刻重写版**。它保留了原项目的核心能力与交互方式，并全程改用 Kotlin 实现，目标很简单：当你已经知道接口地址时，尽可能快地帮你定位到服务端入口代码。插件支持 Spring MVC / Spring Boot、JAX-RS，同时兼容 Java 与 Kotlin 控制器项目。
 
 > 关于名称：`RestfulRadar` 中的 `Radar` 取自"雷达扫描"之意——本插件会扫描项目中的全部 REST 接口，并支持当你已知接口地址时，尽快跳转到服务端入口代码。它是 Java 版 RestfulToolkitPlus 的 Kotlin 复刻重写版。
 
@@ -168,7 +168,7 @@ gradlew.bat runIde
 插件源码全部使用 Kotlin 编写。受 `build.gradle.kts` 中 `sourceSets` 配置的影响，生产代码目录位于 `src/main/java/`（尽管文件是 `.kt`）。
 
 ```text
-src/main/java/com/shenszq/restful/
+src/main/java/com/xishanrain/restful/
 ├── annotations/                 Spring / JAX-RS 注解定义
 ├── common/
 │   ├── resolver/                接口解析器（Spring / JAX-RS）
@@ -189,10 +189,10 @@ src/main/resources/META-INF/
 
 - `build.gradle.kts`：插件构建、IDE 基线版本、兼容性配置
 - `src/main/resources/META-INF/plugin.xml`：插件 ID、依赖、动作和兼容性声明
-- `src/main/java/com/shenszq/restful/navigation/action/GotoRequestMappingAction.kt`：入口动作
-- `src/main/java/com/shenszq/restful/common/UrlPatternUtils.kt`：URL 归一化与匹配规则
-- `src/main/java/com/shenszq/restful/common/resolver/SpringResolver.kt`：Spring 接口扫描实现
-- `src/main/java/com/shenszq/restful/common/resolver/JaxrsResolver.kt`：JAX-RS 接口扫描实现
+- `src/main/java/com/xishanrain/restful/navigation/action/GotoRequestMappingAction.kt`：入口动作
+- `src/main/java/com/xishanrain/restful/common/UrlPatternUtils.kt`：URL 归一化与匹配规则
+- `src/main/java/com/xishanrain/restful/common/resolver/SpringResolver.kt`：Spring 接口扫描实现
+- `src/main/java/com/xishanrain/restful/common/resolver/JaxrsResolver.kt`：JAX-RS 接口扫描实现
 
 ## 常见问题
 
@@ -214,7 +214,7 @@ src/main/resources/META-INF/
 
 ## 致谢
 
-本项目复刻自 GitHub 开源项目 [RestfulToolkitPlus](https://github.com/shenszq/RestfulToolkitPlus)（Java 实现），感谢其提供的设计思路与功能基线。RestfulRadar 在此基础上完成了 Kotlin 化的整体重写。
+本项目复刻自 GitHub 开源项目 [RestfulToolkitPlus](https://github.com/xishanrain/RestfulToolkitPlus)（Java 实现），感谢其提供的设计思路与功能基线。RestfulRadar 在此基础上完成了 Kotlin 化的整体重写。
 
 ## 贡献
 
@@ -226,3 +226,25 @@ src/main/resources/META-INF/
 2. `GotoRequestMappingModel`
 3. `SpringResolver` / `JaxrsResolver`
 4. `UrlPatternUtils`
+
+## License
+
+本项目以 [Apache License 2.0](LICENSE) 授权发布。
+
+Copyright 2026 XiShanRain
+
+```text
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+RestfulRadar 是 [RestfulToolkitPlus](https://github.com/xishanrain/RestfulToolkitPlus)（Java 版）的 Kotlin 重写版本，上游项目及其作者的版权声明同样适用于本项目的衍生部分；再分发时请保留本项目的 `LICENSE` 文件及版权声明。

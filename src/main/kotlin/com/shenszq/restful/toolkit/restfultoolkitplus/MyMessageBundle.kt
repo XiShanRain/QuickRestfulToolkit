@@ -1,4 +1,4 @@
-package com.shenszq.restful.toolkit.restfultoolkitplus
+package com.xishanrain.restful.toolkit.restfultoolkitplus
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.Nls

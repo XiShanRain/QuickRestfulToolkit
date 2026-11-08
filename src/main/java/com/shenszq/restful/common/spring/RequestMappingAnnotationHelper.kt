@@ -1,11 +1,11 @@
-package com.shenszq.restful.common.spring
+package com.xishanrain.restful.common.spring
 
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
-import com.shenszq.restful.annotations.SpringRequestMethodAnnotation
-import com.shenszq.restful.common.PsiAnnotationHelper
-import com.shenszq.restful.method.RequestPath
+import com.xishanrain.restful.annotations.SpringRequestMethodAnnotation
+import com.xishanrain.restful.common.PsiAnnotationHelper
+import com.xishanrain.restful.method.RequestPath
 
 object RequestMappingAnnotationHelper {
     fun getRequestPaths(psiClass: PsiClass): List<RequestPath> {

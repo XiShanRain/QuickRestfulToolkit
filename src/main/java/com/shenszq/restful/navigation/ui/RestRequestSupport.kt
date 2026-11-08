@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.ui
+package com.xishanrain.restful.navigation.ui
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.module.Module

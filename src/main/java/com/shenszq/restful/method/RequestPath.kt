@@ -1,4 +1,4 @@
-package com.shenszq.restful.method
+package com.xishanrain.restful.method
 
 data class RequestPath(var path: String, val method: String?) {
     fun concat(classRequestPath: RequestPath) {

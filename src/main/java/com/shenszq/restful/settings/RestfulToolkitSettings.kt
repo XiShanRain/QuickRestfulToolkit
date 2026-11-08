@@ -1,4 +1,4 @@
-package com.shenszq.restful.settings
+package com.xishanrain.restful.settings
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service

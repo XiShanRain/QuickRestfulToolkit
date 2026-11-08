@@ -1,13 +1,13 @@
-package com.shenszq.restful.navigation.ui
+package com.xishanrain.restful.navigation.ui
 
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.shenszq.restful.navigation.action.GotoRequestMappingAction
-import com.shenszq.restful.navigation.action.RestfulRadarActions
-import com.shenszq.restful.settings.RestfulToolkitSettings
+import com.xishanrain.restful.navigation.action.GotoRequestMappingAction
+import com.xishanrain.restful.navigation.action.RestfulRadarActions
+import com.xishanrain.restful.settings.RestfulToolkitSettings
 
 /**
  * 在“模态对话框搜索”与“右侧 RestfulRadar 工具窗口”之间切换（两种都是插件自己的窗口）。

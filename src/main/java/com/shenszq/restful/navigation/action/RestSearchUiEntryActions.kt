@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -8,7 +8,7 @@ import com.intellij.openapi.project.Project
 
 /**
  * 独立入口：始终以“对话框式搜索”打开 REST 路径检索（全项目范围），
- * 不受 [com.shenszq.restful.settings.RestfulToolkitSettings.dialogSearchPreferred] 偏好影响。
+ * 不受 [com.xishanrain.restful.settings.RestfulToolkitSettings.dialogSearchPreferred] 偏好影响。
  *
  * 与 [OpenRestSearchPopupAction] 成对提供：两者是各自独立的动作，可在 IDE Keymap 中
  * 分别绑定快捷键，互不冲突，从而把“对话框”和“弹层”两种入口固定到不同的键位上。

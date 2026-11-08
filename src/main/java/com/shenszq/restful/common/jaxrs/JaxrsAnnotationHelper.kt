@@ -1,12 +1,12 @@
-package com.shenszq.restful.common.jaxrs
+package com.xishanrain.restful.common.jaxrs
 
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
-import com.shenszq.restful.annotations.JaxrsHttpMethodAnnotation
-import com.shenszq.restful.annotations.JaxrsPathAnnotation
-import com.shenszq.restful.common.PsiAnnotationHelper
-import com.shenszq.restful.method.RequestPath
+import com.xishanrain.restful.annotations.JaxrsHttpMethodAnnotation
+import com.xishanrain.restful.annotations.JaxrsPathAnnotation
+import com.xishanrain.restful.common.PsiAnnotationHelper
+import com.xishanrain.restful.method.RequestPath
 
 object JaxrsAnnotationHelper {
     fun getRequestPaths(psiMethod: PsiMethod): List<RequestPath> {

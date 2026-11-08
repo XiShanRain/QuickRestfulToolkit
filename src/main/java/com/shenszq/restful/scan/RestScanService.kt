@@ -1,4 +1,4 @@
-package com.shenszq.restful.scan
+package com.xishanrain.restful.scan
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
@@ -9,6 +9,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -17,9 +18,9 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.shenszq.restful.common.ServiceHelper
-import com.shenszq.restful.navigation.action.RestServiceItem
-import com.shenszq.restful.settings.RestfulToolkitSettings
+import com.xishanrain.restful.common.ServiceHelper
+import com.xishanrain.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.settings.RestfulToolkitSettings
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ForkJoinPool
@@ -77,6 +78,10 @@ class RestScanService(private val project: Project) : Disposable {
     }
 
     fun collectItems(onlyThisModule: Boolean, module: Module?): List<RestServiceItem> {
+        // dumb mode 下 Java 索引不可用（findClass 会抛 IndexNotReadyException）：
+        // 直接返回已有缓存（可能为空）而不报错；预热任务会在索引就绪后补齐。
+        if (DumbService.isDumb(project)) return cachedItems ?: emptyList()
+
         // 模块范围使用较少，直接按模块作用域计算，不进项目缓存
         if (onlyThisModule && module != null) {
             val items = ServiceHelper.buildRestServiceItemListUsingResolver(module)
@@ -103,7 +108,8 @@ class RestScanService(private val project: Project) : Disposable {
     }
 
     /**
-     * 项目启动后在后台预热缓存：非阻塞读操作（自动等待索引就绪、可取消）。
+     * 项目启动后在后台预热缓存：非阻塞读操作，并且**等到索引就绪（smart mode）才开始**，
+     * 否则建索引阶段调用 JavaPsiFacade.findClass 会抛 IndexNotReadyException。
      * 统一走 [collectItems]（内部持锁 + 写缓存），避免与弹窗侧的同步构建并发跑
      * buildAll 而争用 gapItemsByPath 等非线程安全库存。
      */
@@ -111,6 +117,7 @@ class RestScanService(private val project: Project) : Disposable {
         if (!dirty && cachedItems != null) return
         if (!warming.compareAndSet(false, true)) return
         ReadAction.nonBlocking<Unit> { collectItems(false, null) }
+            .inSmartMode(project)
             .expireWhen { project.isDisposed }
             .finishOnUiThread(ModalityState.any()) { warming.set(false) }
             .submit(ForkJoinPool.commonPool())

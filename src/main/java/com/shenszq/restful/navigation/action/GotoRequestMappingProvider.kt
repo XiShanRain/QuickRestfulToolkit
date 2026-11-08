@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.ide.util.gotoByName.ChooseByNameItemProvider
 import com.intellij.ide.util.gotoByName.ChooseByNameModel
@@ -7,7 +7,7 @@ import com.intellij.ide.util.gotoByName.DefaultChooseByNameItemProvider
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.psi.PsiElement
 import com.intellij.util.Processor
-import com.shenszq.restful.common.UrlPatternUtils
+import com.xishanrain.restful.common.UrlPatternUtils
 
 class GotoRequestMappingProvider(context: PsiElement?) : DefaultChooseByNameItemProvider(context) {
     override fun filterElements(

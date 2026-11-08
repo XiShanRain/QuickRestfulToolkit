@@ -1,10 +1,10 @@
-package com.shenszq.restful.common
+package com.xishanrain.restful.common
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
-import com.shenszq.restful.common.resolver.JaxrsResolver
-import com.shenszq.restful.common.resolver.SpringResolver
-import com.shenszq.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.common.resolver.JaxrsResolver
+import com.xishanrain.restful.common.resolver.SpringResolver
+import com.xishanrain.restful.navigation.action.RestServiceItem
 
 object ServiceHelper {
     fun buildRestServiceItemListUsingResolver(module: Module): List<RestServiceItem> = distinctItems(

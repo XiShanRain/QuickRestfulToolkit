@@ -1,10 +1,10 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.navigation.ChooseByNameContributor
 import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
-import com.shenszq.restful.scan.RestScanService
+import com.xishanrain.restful.scan.RestScanService
 
 class GotoRequestMappingContributor(private val module: Module?) : ChooseByNameContributor {
     @Volatile

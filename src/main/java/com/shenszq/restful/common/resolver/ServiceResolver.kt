@@ -1,6 +1,6 @@
-package com.shenszq.restful.common.resolver
+package com.xishanrain.restful.common.resolver
 
-import com.shenszq.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.navigation.action.RestServiceItem
 
 interface ServiceResolver {
     fun findAllSupportedServiceItemsInModule(): List<RestServiceItem>

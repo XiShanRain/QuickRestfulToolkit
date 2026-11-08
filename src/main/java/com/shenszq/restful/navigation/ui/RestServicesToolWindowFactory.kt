@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.ui
+package com.xishanrain.restful.navigation.ui
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionManager
@@ -27,12 +27,12 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.JBUI
-import com.shenszq.restful.common.ToolkitIcons
-import com.shenszq.restful.common.UrlPatternUtils
-import com.shenszq.restful.navigation.action.GotoRequestMappingAction
-import com.shenszq.restful.navigation.action.RestServiceItem
-import com.shenszq.restful.navigation.action.RestfulRadarActions
-import com.shenszq.restful.scan.RestScanService
+import com.xishanrain.restful.common.ToolkitIcons
+import com.xishanrain.restful.common.UrlPatternUtils
+import com.xishanrain.restful.navigation.action.GotoRequestMappingAction
+import com.xishanrain.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.navigation.action.RestfulRadarActions
+import com.xishanrain.restful.scan.RestScanService
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.datatransfer.StringSelection
@@ -222,6 +222,8 @@ private class RestServicesPanel(private val project: Project) : JBPanel<JBPanel<
         val token = ++reloadToken
         val service = RestScanService.getInstance(project)
         ReadAction.nonBlocking<List<RestServiceItem>> { service.collectItems(false, null) }
+            // 扫描依赖 Java 索引：dumb mode 下等待索引就绪再执行，否则会抛 IndexNotReadyException。
+            .inSmartMode(project)
             .expireWhen { project.isDisposed }
             // 本面板是工具窗口组件：回调只更新自身 Swing 组件，用 ANY 避免被模态队列挂起。
             .finishOnUiThread(ModalityState.any()) { list ->

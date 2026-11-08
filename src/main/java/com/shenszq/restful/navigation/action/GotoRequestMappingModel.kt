@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.PropertiesComponent
@@ -8,8 +8,8 @@ import com.intellij.navigation.ChooseByNameContributor
 import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
-import com.shenszq.restful.common.UrlPatternUtils
-import com.shenszq.restful.method.HttpMethod
+import com.xishanrain.restful.common.UrlPatternUtils
+import com.xishanrain.restful.method.HttpMethod
 
 class GotoRequestMappingModel(project: Project, contributors: Array<ChooseByNameContributor>) :
     FilteringGotoByModel<HttpMethod>(project, contributors), DumbAware, CustomMatcherModel {

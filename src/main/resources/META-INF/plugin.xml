@@ -1,15 +1,61 @@
 <idea-plugin>
-    <id>com.shenszq.restful.restfulradar</id>
+    <id>com.xishanrain.restful.restfulradar</id>
     <name>RestfulRadar</name>
-    <vendor email="support@example.com">shenszq</vendor>
+    <vendor email="rainxishan@gmail.com">xishanrain</vendor>
 
     <description><![CDATA[
-        <h3>RESTful service navigation for IntelliJ IDEA 2024.3+</h3>
+        <h3>RESTful service navigation for IntelliJ IDEA</h3>
+        <p>Jump from a URL path straight to the controller method that serves it. Paste an address copied from a
+        browser, Postman or a log file, and RestfulRadar scans every REST endpoint in your project and takes you
+        to the matching handler.</p>
+
+        <h4>Features</h4>
         <ul>
-            <li>Jump from a URL path to the matching controller method.</li>
-            <li>Supports Spring MVC / Spring Boot and JAX-RS.</li>
-            <li>Supports Java and Kotlin controllers without relying on fragile Kotlin internal indexes.</li>
+            <li>Search by full URL, relative path or bare endpoint path.</li>
+            <li>Input is normalized automatically: protocol, host, port, query string and hash are stripped.</li>
+            <li>Scans Spring MVC / Spring Boot and JAX-RS endpoints.</li>
+            <li>Works with both Java and Kotlin controllers, including Kotlin K2 mode, without relying on fragile
+            Kotlin internal indexes.</li>
+            <li>Filter results by HTTP method (GET, POST, PUT, DELETE, PATCH, ...).</li>
+            <li>Optionally limit the search to the current module.</li>
+            <li>Reuses the text selected in the editor or the URL in the clipboard as the initial query.</li>
+            <li>Choose a modal dialog or a right-side tool window as the default search UI.</li>
         </ul>
+
+        <h4>How to use</h4>
+        <ol>
+            <li>Press <code>Ctrl+Alt+/</code>, or run <b>Go to REST Service</b> from <b>Find Action</b>.</li>
+            <li>Paste or type the request address, for example <code>/api/users/42</code> or
+            <code>https://example.com/api/users/42?active=true</code>.</li>
+            <li>Optionally pick an HTTP method and tick <b>Current module</b>.</li>
+            <li>Press <code>Enter</code> or click a result to open the matching controller method.</li>
+        </ol>
+        <p>Path variables are supported, for example <code>/users/{id}</code> or <code>/orders/{orderId:\d+}</code>.</p>
+
+        <h4>Actions and shortcuts</h4>
+        <ul>
+            <li><b>Go to REST Service</b> - <code>Ctrl+Alt+/</code>, opens the search UI configured in the settings.</li>
+            <li><b>Switch REST Search UI</b> - <code>Ctrl+Alt+Shift+/</code>, toggles the preferred search UI.</li>
+            <li><b>Go to REST Service (Dialog)</b> and <b>Go to REST Service (Popup)</b> - always open the fixed UI;
+            no default shortcut, bind your own under <b>Settings | Keymap</b>.</li>
+            <li><b>Rescan REST Mappings</b> - clear the cache and scan the project again.</li>
+            <li>All actions are also available under <b>Tools | RestfulRadar</b>.</li>
+        </ul>
+
+        <h4>Settings</h4>
+        <p>Under <b>Settings | Tools | RestfulRadar</b> you can choose the window opened by <code>Ctrl+Alt+/</code>
+        (dialog or right-side tool window) and the maximum number of results shown in the list.</p>
+
+        <h4>Compatibility</h4>
+        <ul>
+            <li>IntelliJ IDEA 2024.3 (build 243) and later, up to 2026.3.</li>
+            <li>Uses the bundled Java, Kotlin, YAML and Properties plugins.</li>
+            <li>No runtime dependency on Spring or JAX-RS libraries.</li>
+        </ul>
+
+        <h4>License</h4>
+        <p>Apache License 2.0. Source code and issue tracker:
+        <a href="https://github.com/XiShanRain/QuickRestfulToolkit">github.com/XiShanRain/QuickRestfulToolkit</a></p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -19,18 +65,18 @@
     <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.shenszq.restful.navigation.action.GotoRequestMappingConfiguration"/>
-        <postStartupActivity implementation="com.shenszq.restful.scan.RestScanStartupActivity"/>
+        <projectService serviceImplementation="com.xishanrain.restful.navigation.action.GotoRequestMappingConfiguration"/>
+        <postStartupActivity implementation="com.xishanrain.restful.scan.RestScanStartupActivity"/>
         <notificationGroup id="RestfulRadar" displayType="BALLOON"/>
         <applicationConfigurable
-                id="com.shenszq.restful.settings"
+                id="com.xishanrain.restful.settings"
                 parentId="tools"
-                instance="com.shenszq.restful.settings.RestfulToolkitConfigurable"
+                instance="com.xishanrain.restful.settings.RestfulToolkitConfigurable"
                 displayName="RestfulRadar"/>
         <toolWindow id="RestfulRadar"
                     anchor="right"
                     icon="/icons/service.png"
-                    factoryClass="com.shenszq.restful.navigation.ui.RestServicesToolWindowFactory"
+                    factoryClass="com.xishanrain.restful.navigation.ui.RestServicesToolWindowFactory"
                     doNotActivateOnStart="true"/>
     </extensions>
 
@@ -42,18 +88,18 @@
         <group id="RestfulRadar.Tools" text="RestfulRadar" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <action id="RestfulRadar.GotoService"
-                    class="com.shenszq.restful.navigation.action.GotoRequestMappingAction"
+                    class="com.xishanrain.restful.navigation.action.GotoRequestMappingAction"
                     text="Go to REST Service"
                     description="Jump to a REST controller method by URL"
                     icon="AllIcons.Actions.Search">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SLASH"/>
             </action>
             <action id="RestfulRadar.RescanRest"
-                    class="com.shenszq.restful.navigation.action.RescanRestAction"
+                    class="com.xishanrain.restful.navigation.action.RescanRestAction"
                     text="Rescan REST Mappings"
                     description="Clear cache and re-scan all REST mappings"/>
             <action id="RestfulRadar.SwitchSearchUi"
-                    class="com.shenszq.restful.navigation.action.SwitchRestSearchUiAction"
+                    class="com.xishanrain.restful.navigation.action.SwitchRestSearchUiAction"
                     text="Switch REST Search UI (Dialog / Right Panel)"
                     description="Toggle the preferred REST search entry between the dialog and the right RestfulRadar tool window">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift SLASH"/>
@@ -65,12 +111,12 @@
                 所有 action ID 统一用 RestfulRadar. 前缀，避免与其他 RestfulToolkit 系插件撞 ID。
             -->
             <action id="RestfulRadar.GotoServiceDialog"
-                    class="com.shenszq.restful.navigation.action.OpenRestSearchDialogAction"
+                    class="com.xishanrain.restful.navigation.action.OpenRestSearchDialogAction"
                     text="Go to REST Service (Dialog)"
                     description="Always open the dialog-style REST path search (project-wide)"
                     icon="AllIcons.Actions.Search"/>
             <action id="RestfulRadar.GotoServicePopup"
-                    class="com.shenszq.restful.navigation.action.OpenRestSearchPopupAction"
+                    class="com.xishanrain.restful.navigation.action.OpenRestSearchPopupAction"
                     text="Go to REST Service (Popup)"
                     description="Always open the ChooseByName popup REST path search (project-wide)"
                     icon="AllIcons.Actions.Search"/>

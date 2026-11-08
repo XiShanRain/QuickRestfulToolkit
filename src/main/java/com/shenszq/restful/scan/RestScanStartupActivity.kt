@@ -1,4 +1,4 @@
-package com.shenszq.restful.scan
+package com.xishanrain.restful.scan
 
 import com.intellij.openapi.startup.ProjectActivity
 

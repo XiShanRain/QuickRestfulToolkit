@@ -1,4 +1,4 @@
-package com.shenszq.restful.annotations
+package com.xishanrain.restful.annotations
 
 interface PathMappingAnnotation {
     val qualifiedName: String

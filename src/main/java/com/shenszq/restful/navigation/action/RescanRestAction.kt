@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
-import com.shenszq.restful.scan.RestScanService
+import com.xishanrain.restful.scan.RestScanService
 
 /**
  * 显式“重新扫描”：丢弃整批结果缓存与补漏库存，下次打开/后台重建会走全量扫描。

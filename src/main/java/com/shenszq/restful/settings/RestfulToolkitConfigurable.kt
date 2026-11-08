@@ -1,4 +1,4 @@
-package com.shenszq.restful.settings
+package com.xishanrain.restful.settings
 
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
@@ -46,7 +46,7 @@ class RestfulToolkitConfigurable : Configurable {
 
     /** 插件版本号：构建时由 patchPluginXml 写入 plugin.xml，运行时从描述符读取，随发布包自动更新。 */
     private fun pluginVersion(): String =
-        PluginManagerCore.getPlugin(PluginId.getId("com.shenszq.restful.restfulradar"))?.version ?: "未知"
+        PluginManagerCore.getPlugin(PluginId.getId("com.xishanrain.restful.restfulradar"))?.version ?: "未知"
 
     override fun createComponent(): JComponent {
         gapFillCheck = JBCheckBox("为未被索引覆盖的文件启用补漏扫描（推荐）", settings.gapFillEnabled)
@@ -182,7 +182,7 @@ class RestfulToolkitConfigurable : Configurable {
         settings.esPath = esPathField?.text ?: ""
         // 设置变化后让各项目的缓存失效并后台重建
         ProjectManager.getInstance().openProjects.forEach { project ->
-            val service = com.shenszq.restful.scan.RestScanService.getInstance(project)
+            val service = com.xishanrain.restful.scan.RestScanService.getInstance(project)
             service.invalidate()
             service.warmUp()
         }

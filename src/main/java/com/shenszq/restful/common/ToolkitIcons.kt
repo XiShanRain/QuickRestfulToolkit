@@ -1,8 +1,8 @@
-package com.shenszq.restful.common
+package com.xishanrain.restful.common
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.util.IconLoader
-import com.shenszq.restful.method.HttpMethod
+import com.xishanrain.restful.method.HttpMethod
 import javax.swing.Icon
 
 object ToolkitIcons {

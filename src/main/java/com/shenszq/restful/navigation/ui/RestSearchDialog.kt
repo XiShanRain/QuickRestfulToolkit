@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.ui
+package com.xishanrain.restful.navigation.ui
 
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
@@ -9,12 +9,12 @@ import com.intellij.ui.CollectionListModel
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
-import com.shenszq.restful.common.ToolkitIcons
-import com.shenszq.restful.common.UrlPatternUtils
-import com.shenszq.restful.method.HttpMethod
-import com.shenszq.restful.navigation.action.RestServiceItem
-import com.shenszq.restful.scan.RestScanService
-import com.shenszq.restful.settings.RestfulToolkitSettings
+import com.xishanrain.restful.common.ToolkitIcons
+import com.xishanrain.restful.common.UrlPatternUtils
+import com.xishanrain.restful.method.HttpMethod
+import com.xishanrain.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.scan.RestScanService
+import com.xishanrain.restful.settings.RestfulToolkitSettings
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -259,6 +259,8 @@ class RestSearchDialog(
             RebuildMode.NONE -> Unit
         }
         ReadAction.nonBlocking<List<RestServiceItem>> { service.collectItems(false, null) }
+            // 扫描依赖 Java 索引：dumb mode 下等待索引就绪再执行，否则会抛 IndexNotReadyException。
+            .inSmartMode(project)
             .expireWhen { project.isDisposed || dismissed }
             // 本对话框是模态窗口：回调只更新自身组件，用 ANY 避免被模态队列挂起到窗口关闭；
             // dismissed 标志保证窗口已关时不再触碰已销毁组件。

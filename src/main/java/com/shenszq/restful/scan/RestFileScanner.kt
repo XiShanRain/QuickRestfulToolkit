@@ -1,4 +1,4 @@
-package com.shenszq.restful.scan
+package com.xishanrain.restful.scan
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.diagnostic.Logger
@@ -11,9 +11,9 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
-import com.shenszq.restful.common.PsiAnnotationHelper
-import com.shenszq.restful.navigation.action.RestServiceItem
-import com.shenszq.restful.settings.RestfulToolkitSettings
+import com.xishanrain.restful.common.PsiAnnotationHelper
+import com.xishanrain.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.settings.RestfulToolkitSettings
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId

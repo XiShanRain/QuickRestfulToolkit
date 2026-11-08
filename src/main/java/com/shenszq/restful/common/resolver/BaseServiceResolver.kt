@@ -1,12 +1,12 @@
-package com.shenszq.restful.common.resolver
+package com.xishanrain.restful.common.resolver
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
-import com.shenszq.restful.method.RequestPath
-import com.shenszq.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.method.RequestPath
+import com.xishanrain.restful.navigation.action.RestServiceItem
 
 abstract class BaseServiceResolver : ServiceResolver {
     protected var myModule: Module? = null

@@ -1,4 +1,4 @@
-package com.shenszq.restful.method
+package com.xishanrain.restful.method
 
 enum class HttpMethod {
     GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE, CONNECT;

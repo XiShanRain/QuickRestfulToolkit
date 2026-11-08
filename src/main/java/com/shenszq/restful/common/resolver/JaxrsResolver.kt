@@ -1,4 +1,4 @@
-package com.shenszq.restful.common.resolver
+package com.xishanrain.restful.common.resolver
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
@@ -6,9 +6,9 @@ import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedElementsSearch
-import com.shenszq.restful.annotations.JaxrsPathAnnotation
-import com.shenszq.restful.common.jaxrs.JaxrsAnnotationHelper
-import com.shenszq.restful.navigation.action.RestServiceItem
+import com.xishanrain.restful.annotations.JaxrsPathAnnotation
+import com.xishanrain.restful.common.jaxrs.JaxrsAnnotationHelper
+import com.xishanrain.restful.navigation.action.RestServiceItem
 
 class JaxrsResolver(private val module: Module?) : BaseServiceResolver() {
     constructor(project: Project) : this(null) { myProject = project }

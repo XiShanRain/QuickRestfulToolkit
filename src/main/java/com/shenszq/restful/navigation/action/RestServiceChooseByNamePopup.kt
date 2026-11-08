@@ -1,4 +1,4 @@
-package com.shenszq.restful.navigation.action
+package com.xishanrain.restful.navigation.action
 
 import com.intellij.ide.util.gotoByName.ChooseByNameItemProvider
 import com.intellij.ide.util.gotoByName.ChooseByNameModel
@@ -6,9 +6,9 @@ import com.intellij.ide.util.gotoByName.ChooseByNamePopup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.text.StringUtil
-import com.shenszq.restful.common.UrlPatternUtils
-import com.shenszq.restful.navigation.ui.RestSearchUiSwitch
-import com.shenszq.restful.settings.RestfulToolkitSettings
+import com.xishanrain.restful.common.UrlPatternUtils
+import com.xishanrain.restful.navigation.ui.RestSearchUiSwitch
+import com.xishanrain.restful.settings.RestfulToolkitSettings
 import java.awt.event.KeyEvent
 import javax.swing.JComponent
 import javax.swing.KeyStroke
