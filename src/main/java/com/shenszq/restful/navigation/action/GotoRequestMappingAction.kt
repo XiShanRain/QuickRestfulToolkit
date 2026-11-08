@@ -1,107 +1,109 @@
 package com.shenszq.restful.navigation.action
 
-import com.intellij.ide.actions.GotoActionBase
 import com.intellij.ide.util.gotoByName.ChooseByNameFilter
-import com.intellij.ide.util.gotoByName.ChooseByNameModel
 import com.intellij.ide.util.gotoByName.ChooseByNamePopup
+import com.intellij.ide.util.gotoByName.ChooseByNamePopupComponent
 import com.intellij.navigation.ChooseByNameContributor
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import com.shenszq.restful.method.HttpMethod
 import com.shenszq.restful.navigation.ui.RestSearchDialog
 import com.shenszq.restful.settings.RestfulToolkitSettings
 import java.awt.datatransfer.DataFlavor
 
-class GotoRequestMappingAction : GotoActionBase(), DumbAware {
+/**
+ * 主搜索入口（默认快捷键 Ctrl+Alt+/）：每次按下在对话框与 ChooseByName 弹层之间**交替**。
+ *
+ * 交替行为：每次按下先把“下一次要用的 UI”翻转一次，再按翻转后的结果打开，
+ * 于是连续按是 “弹层 → 对话框 → 弹层 …”（初始偏好为对话框时）。
+ * 可在设置里关掉交替，改为固定使用某一种 UI。
+ *
+ * 重要重构（A 方案）：本动作**不再继承** `GotoActionBase`。后者用一个跨所有 goto 动作
+ * 共享的 `protected static myInAction` 做防重入，只要它非空，`GotoActionBase.update()` 就会把
+ * 本动作置为 disabled，导致“第一次能用、之后热键静默失效（无日志无异常）”——此前靠反射手工
+ * 清该标记，非常脆弱。现在：
+ * - 对话框直接用 `DialogWrapper`（[RestSearchDialog]）打开；
+ * - 弹层直接用 `ChooseByNamePopup.invoke(callback, ModalityState.current(), true)` 打开，
+ *   方法过滤 UI 由构造 [ChooseByNameFilter] 时内部 `setToolArea` 完成。
+ * 全程不触碰那个全局静态标记，从根本上消除该类问题。
+ */
+class GotoRequestMappingAction : AnAction(), DumbAware {
 
-    override fun gotoActionPerformed(e: AnActionEvent) {
-        val project = e.project
-        val dialogPreferred = RestfulToolkitSettings.getInstance().dialogSearchPreferred
-        // 入口日志：排查“热键无反应”时用于区分“动作未被调用”与“动作被调用但窗口未生效”。
-        LOG.info("[RestfulRadar] gotoActionPerformed: project=${project?.name}, preferred=${if (dialogPreferred) "dialog" else "popup"}")
-        if (project == null) return
-        if (dialogPreferred) {
+    override fun actionPerformed(e: AnActionEvent) {
+        val project: Project = e.project ?: return
+        val useDialog = resolveUiForInvoke()
+        LOG.info("[RestfulRadar] actionPerformed: project=${project.name}, ui=${if (useDialog) "dialog" else "popup"}")
+        if (project.isDisposed) return
+        if (useDialog) {
             openDialog(project, tryFindCopiedUrl())
-            return
+        } else {
+            openPopup(project, LangDataKeys.MODULE.getData(e.dataContext), tryFindCopiedUrl())
         }
-        openPopup(
-            project,
-            LangDataKeys.MODULE.getData(e.dataContext),
-            getPsiContext(e),
-            tryFindCopiedUrl()
-        )
     }
 
-    /** 供切换动作调用：以对话框（首选 UI）打开，全项目范围。 */
+    /**
+     * 决定本次按下用哪个 UI，并把“下一次要用的 UI”写回设置：
+     * - 开启交替（默认）：翻转偏好，本次即按翻转后的结果打开；
+     * - 关闭交替：保持偏好不变，固定用同一种 UI。
+     */
+    private fun resolveUiForInvoke(): Boolean {
+        val settings = RestfulToolkitSettings.getInstance()
+        if (!settings.alternateSearchUiOnInvoke) return settings.dialogSearchPreferred
+        val next = !settings.dialogSearchPreferred
+        settings.dialogSearchPreferred = next
+        return next
+    }
+
+    override fun update(e: AnActionEvent) {
+        // 仅在有项目时可用；不再受任何跨动作静态标记影响。
+        e.presentation.isEnabledAndVisible = e.project != null
+    }
+
+    /** 供切换动作 / 独立入口 / 工具窗口调用：以对话框打开，全项目范围。 */
     fun showAsDialog(project: Project) = openDialog(project, tryFindCopiedUrl())
 
-    /** 供切换动作调用：以 ChooseByName 弹层（兜底 UI）打开，全项目范围。 */
-    fun showAsPopup(project: Project) = openPopup(project, null, null, tryFindCopiedUrl())
+    /** 供切换动作 / 独立入口 / 工具窗口调用：以弹层打开，全项目范围。 */
+    fun showAsPopup(project: Project) = openPopup(project, null, tryFindCopiedUrl())
 
     private fun openDialog(project: Project, initialText: String?) {
-        if (project.isDisposed) {
-            // 极端情况下（动作执行瞬间项目被销毁）：同样要清掉 actionPerformed 已设置的防重入标记，
-            // 否则标记残留会让热键此后永久失效（见下方 finally 注释）。
-            clearMyInActionIfMine()
-            return
-        }
+        if (project.isDisposed) return
         LOG.info("[RestfulRadar] openDialog: create + show")
         val dialog = RestSearchDialog(project, initialText)
-        val confirmed = try {
-            // 同步进入模态循环（平台动作的标准做法）。不要改用 invokeLater(ModalityState.any()) 推迟：
-            // 该回调会被 FlushQueue 拉进“已有写意图执行栈”中运行，showAndGet 的模态事件泵整体嵌套在
-            // 写意图栈内；对话框打开期间应用激活等事件触发 VFS 刷新时，平台报
-            // “Write-unsafe context! ... (not "any")” SEVERE 并归咎本插件。
-            dialog.showAndGet()
-        } finally {
-            // 根因修复（“第一次弹窗正常、之后热键再按完全无反应”）：GotoActionBase 用
-            // protected static myInAction 做防重入，actionPerformed 时置为本动作类，但只在
-            // ChooseByName 弹层的关闭回调（GotoActionBase$1.onClose）中清除；对话框分支不经过该
-            // 回调，标记永久残留 → 此后 update() 恒 disabled → 2024.3 快捷键执行链
-            // （ActionManagerImplKt.tryToExecuteNow）在 isEnabled 检查处静默跳过（无日志无异常）。
-            clearMyInActionIfMine()
-        }
+        // 同步进入模态循环（平台动作的标准做法）。不要改用 invokeLater(ModalityState.any()) 推迟：
+        // 该回调会被 FlushQueue 拉进“已有写意图执行栈”中运行，showAndGet 的模态事件泵整体嵌套在
+        // 写意图栈内；对话框打开期间应用激活等事件触发 VFS 刷新时，平台报
+        // “Write-unsafe context! ... (not "any")” SEVERE 并归咎本插件。
+        val confirmed = dialog.showAndGet()
         LOG.info("[RestfulRadar] openDialog: modal loop exited, confirmed=$confirmed, target=${dialog.chosenItem?.url}")
         // 导航必须在模态循环完全退出之后执行：不要在对话框 doOKAction 内 close() 后立即导航。
         if (confirmed) dialog.chosenItem?.navigate(true)
     }
 
-    private fun openPopup(project: Project, module: Module?, context: PsiElement?, predefinedText: String?) {
-        // 对话框→弹层的“切换重开”路径不经过 actionPerformed：此时防重入标记为空，而
-        // showNavigationPopup 入口会 assertTrue(myInAction != null)（不满足会抛断言错），
-        // 且弹层关闭回调只清除与其入口快照相等的标记。故缺失时补设，关闭时由平台自行清除。
-        ensureMyInActionMark()
-        try {
-            val contributors: Array<ChooseByNameContributor> = arrayOf(GotoRequestMappingContributor(module))
-            val model = GotoRequestMappingModel(project, contributors)
-
-            val callback = object : GotoActionCallback<HttpMethod>() {
-                override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<HttpMethod> =
-                    GotoRequestMappingFilter(popup, model, project)
-
-                override fun elementChosen(popup: ChooseByNamePopup, element: Any) {
-                    if (element is RestServiceItem && element.canNavigate()) element.navigate(true)
-                }
+    private fun openPopup(project: Project, module: Module?, predefinedText: String?) {
+        if (project.isDisposed) return
+        LOG.info("[RestfulRadar] openPopup: create + invoke")
+        val contributors: Array<ChooseByNameContributor> = arrayOf(GotoRequestMappingContributor(module))
+        val model = GotoRequestMappingModel(project, contributors)
+        val provider = GotoRequestMappingProvider(null)
+        val popup = RestServiceChooseByNamePopup.createPopup(project, model, provider, predefinedText, false, 0)
+        // 构造即通过 ChooseByNameFilter 内部 setToolArea 把“HTTP 方法过滤”UI 安装到弹层。
+        val filter = GotoRequestMappingFilter(popup, model, project)
+        popup.invoke(object : ChooseByNamePopupComponent.Callback() {
+            override fun elementChosen(element: Any) {
+                if (element is RestServiceItem && element.canNavigate()) element.navigate(true)
             }
 
-            val provider = GotoRequestMappingProvider(context)
-            showNavigationPopup(
-                callback, "Request Mapping URL matching pattern",
-                RestServiceChooseByNamePopup.createPopup(project, model, provider, predefinedText, false, 0),
-                true
-            )
-        } catch (t: Throwable) {
-            // 弹层未能打开时清掉标记，避免残留导致热键永久失效（尤其是“切换重开”路径，
-            // 它不在 actionPerformed 的 catch(Throwable) 兜底范围内）。
-            clearMyInActionIfMine()
-            throw t
-        }
+            override fun onClose() {
+                filter.close()
+            }
+        }, ModalityState.current(), true)
     }
 
     private fun tryFindCopiedUrl(): String? {
@@ -127,36 +129,7 @@ class GotoRequestMappingAction : GotoActionBase(), DumbAware {
         override fun iconForFilterValue(value: HttpMethod) = null
     }
 
-    /**
-     * 补设 [GotoActionBase] 的防重入标记（protected static Class myInAction）为本动作类，仅在其为空时。
-     * 该字段为 Java protected static，Kotlin 直接引用会被编译拒绝，故用反射访问；
-     * runCatching 兜底保证未来平台若移除/重命名字段时退化为原有行为而不是崩溃。
-     */
-    private fun ensureMyInActionMark() {
-        val field = MY_IN_ACTION_FIELD ?: return
-        runCatching {
-            if (field.get(null) == null) {
-                field.set(null, javaClass)
-            }
-        }
-    }
-
-    /** 清除非空且属于本动作类的防重入标记（对话框分支缺少平台 onClose 清理路径，见 openDialog）。 */
-    private fun clearMyInActionIfMine() {
-        val field = MY_IN_ACTION_FIELD ?: return
-        runCatching {
-            if (field.get(null) == javaClass) {
-                field.set(null, null)
-            }
-        }
-    }
-
     companion object {
         private val LOG = Logger.getInstance(GotoRequestMappingAction::class.java)
-
-        /** GotoActionBase 的防重入标记字段（protected static Class myInAction），详见 openDialog 注释。 */
-        private val MY_IN_ACTION_FIELD: java.lang.reflect.Field? = runCatching {
-            GotoActionBase::class.java.getDeclaredField("myInAction").apply { isAccessible = true }
-        }.getOrNull()
     }
 }

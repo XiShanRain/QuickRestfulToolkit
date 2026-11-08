@@ -31,11 +31,11 @@ All Gradle commands use the included wrapper (`./gradlew`). JDK 21 is required.
 
 ### Entry Point
 - `plugin.xml` — declares plugin ID, dependencies (Java, Properties, YAML, Kotlin), action, and project service
-- `GotoRequestMappingAction` — main action bound to `Ctrl+Alt+/`, extends `GotoActionBase`
+- `GotoRequestMappingAction` — main action bound to `Ctrl+Alt+/`, extends `AnAction` (dialog via `DialogWrapper`, popup via `ChooseByNamePopup.invoke`; intentionally NOT `GotoActionBase` to avoid its shared static `myInAction` disabling the hotkey)
 - `GotoRequestMappingConfiguration` — stores user-selected HTTP method filter (Kotlin state persistence via `@State`)
 
 ### Core Flow
-1. User triggers action → `GotoRequestMappingAction.gotoActionPerformed()`
+1. User triggers action → `GotoRequestMappingAction.actionPerformed()`
 2. Creates `GotoRequestMappingModel` + `GotoRequestMappingContributor`
 3. Model queries resolvers (Spring/JAX-RS) for all REST endpoints in scope
 4. `GotoRequestMappingProvider` filters results against user input via `UrlPatternUtils.matches()`

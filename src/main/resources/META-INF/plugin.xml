@@ -58,6 +58,21 @@
                     description="Toggle the preferred REST search entry between the dialog and the ChooseByName popup">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift SLASH"/>
             </action>
+            <!--
+                两个独立入口动作：始终打开对话框 / 始终打开弹层，不受首选 UI 偏好影响。
+                故意不写默认 <keyboard-shortcut>，避免与现有键位及 IDE 自带快捷键冲突；
+                用户可在 Settings > Keymap 搜 "REST Service (Dialog)" / "(Popup)" 各自绑定。
+            -->
+            <action id="Toolkit.GotoServiceDialog"
+                    class="com.shenszq.restful.navigation.action.OpenRestSearchDialogAction"
+                    text="Go to REST Service (Dialog)"
+                    description="Always open the dialog-style REST path search (project-wide)"
+                    icon="AllIcons.Actions.Search"/>
+            <action id="Toolkit.GotoServicePopup"
+                    class="com.shenszq.restful.navigation.action.OpenRestSearchPopupAction"
+                    text="Go to REST Service (Popup)"
+                    description="Always open the ChooseByName popup REST path search (project-wide)"
+                    icon="AllIcons.Actions.Search"/>
         </group>
     </actions>
 </idea-plugin>

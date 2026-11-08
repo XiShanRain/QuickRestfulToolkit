@@ -21,7 +21,7 @@ import javax.swing.border.EmptyBorder
 
 /**
  * RestfulRadar 设置页：
- * - 首选搜索 UI（对话框 / 弹层兜底）与窗口内切换、Ctrl+Alt+Shift+/ 全局切换动作同步翻转
+ * - Ctrl+Alt+/ 是否在对话框与弹层之间交替，以及交替关闭时的固定首选 UI
  * - 对话框打开时是否一直显示结果列表
  * - 补漏扫描开关（默认开）
  * - 方法级 mapping 反查（默认关）
@@ -37,6 +37,7 @@ class RestfulToolkitConfigurable : Configurable {
     private var gapFillCheck: JBCheckBox? = null
     private var methodLevelCheck: JBCheckBox? = null
     private var cacheCheck: JBCheckBox? = null
+    private var alternateCheck: JBCheckBox? = null
     private var dialogPreferredCheck: JBCheckBox? = null
     private var alwaysShowListCheck: JBCheckBox? = null
     private var maxVisibleCombo: javax.swing.JComboBox<Int>? = null
@@ -51,7 +52,8 @@ class RestfulToolkitConfigurable : Configurable {
         gapFillCheck = JBCheckBox("为未被索引覆盖的文件启用补漏扫描（推荐）", settings.gapFillEnabled)
         methodLevelCheck = JBCheckBox("额外按方法级 Mapping 注解反查所在类（最大化召回，稍慢）", settings.methodLevelScanEnabled)
         cacheCheck = JBCheckBox("使用增量缓存（按修改时间跳过未变化文件）", settings.useCache)
-        dialogPreferredCheck = JBCheckBox("使用对话框式搜索作为首选入口（取消则回退弹层；可在窗口内 Ctrl+Alt+P / Ctrl+Alt+Shift+/ 同步翻转）", settings.dialogSearchPreferred)
+        alternateCheck = JBCheckBox("Ctrl+Alt+/ 每次按下在对话框与弹层之间交替（取消则固定使用下方首选 UI）", settings.alternateSearchUiOnInvoke)
+        dialogPreferredCheck = JBCheckBox("固定首选 UI 使用对话框式搜索（仅在关闭上方“交替”时生效）", settings.dialogSearchPreferred)
         alwaysShowListCheck = JBCheckBox("对话框打开时一直显示结果列表（取消则输入后显示）", settings.alwaysShowResultList)
 
         val visibleOptions = listOf(10, 20, 50, 100, 200)
@@ -78,11 +80,19 @@ class RestfulToolkitConfigurable : Configurable {
         btns.add(browse); btns.add(detect)
         pathPanel.add(btns, BorderLayout.EAST)
 
-        val keymapBtn = JButton("在 Keymap 中配置 “Go to REST Service” 快捷键")
+        val keymapBtn = JButton("打开 Keymap 面板配置快捷键")
         keymapBtn.addActionListener {
             val project = ProjectManager.getInstance().openProjects.firstOrNull()
             ShowSettingsUtil.getInstance().showSettingsDialog(project, "Keymap")
         }
+        // 说明可分别绑定的入口动作，以及“对话框/弹层各自独立快捷键”的能力。
+        val keymapHelp = JLabel(
+            "<html>可在 Keymap 中搜索并<em>分别</em>为以下动作指定快捷键，互不影响：<br/>"
+                + "&nbsp;&nbsp;• Go to REST Service（开启交替时每次按下切换 UI）— 默认 Ctrl+Alt+/><br/>"
+                + "&nbsp;&nbsp;• Go to REST Service (Dialog)（始终对话框）— 默认未绑定，可自行添加<br/>"
+                + "&nbsp;&nbsp;• Go to REST Service (Popup)（始终弹层）— 默认未绑定，可自行添加<br/>"
+                + "对话框内结果可直接用 ↑/↓ 选择，Enter 跳转。</html>"
+        )
 
         // 用 GridBagLayout 代替 GridLayout(0,2)：GridLayout 会强制两列等宽，
         // 导致标签与控件之间大片空白、窗口拉小时右侧控件被裁掉。
@@ -128,6 +138,7 @@ class RestfulToolkitConfigurable : Configurable {
         }
 
         addLabeledRow("插件版本:", JLabel(pluginVersion()), false, 0)
+        addFullRow(alternateCheck!!, 8)
         addFullRow(dialogPreferredCheck!!, 8)
         addFullRow(alwaysShowListCheck!!, 8)
         addLabeledRow("结果列表最多显示:", maxVisibleCombo!!, false, 8)
@@ -135,7 +146,8 @@ class RestfulToolkitConfigurable : Configurable {
         addFullRow(methodLevelCheck!!, 8)
         addFullRow(cacheCheck!!, 8)
         addLabeledRow("es.exe 路径:", pathPanel, true, 8)
-        addLabeledRow("快捷键:", keymapBtn, true, 8)
+        addFullRow(keymapHelp, 12)
+        addLabeledRow("快捷键:", keymapBtn, true, 4)
 
         // Settings 页会把组件按首选大小在垂直方向居中摆放，行内 anchor 管不到这一层；
         // 用 BorderLayout 包装层把内容面板钉在顶部（NORTH 占满宽度、贴顶）。
@@ -148,6 +160,7 @@ class RestfulToolkitConfigurable : Configurable {
         if (gapFillCheck?.isSelected != settings.gapFillEnabled) return true
         if (methodLevelCheck?.isSelected != settings.methodLevelScanEnabled) return true
         if (cacheCheck?.isSelected != settings.useCache) return true
+        if (alternateCheck?.isSelected != settings.alternateSearchUiOnInvoke) return true
         if (dialogPreferredCheck?.isSelected != settings.dialogSearchPreferred) return true
         if (alwaysShowListCheck?.isSelected != settings.alwaysShowResultList) return true
         if (maxVisibleCombo?.selectedItem != settings.maxVisibleResults) return true
@@ -159,6 +172,7 @@ class RestfulToolkitConfigurable : Configurable {
         settings.gapFillEnabled = gapFillCheck?.isSelected == true
         settings.methodLevelScanEnabled = methodLevelCheck?.isSelected == true
         settings.useCache = cacheCheck?.isSelected == true
+        settings.alternateSearchUiOnInvoke = alternateCheck?.isSelected == true
         settings.dialogSearchPreferred = dialogPreferredCheck?.isSelected == true
         settings.alwaysShowResultList = alwaysShowListCheck?.isSelected == true
         (maxVisibleCombo?.selectedItem as? Int)?.let { settings.maxVisibleResults = it }
@@ -175,6 +189,7 @@ class RestfulToolkitConfigurable : Configurable {
         gapFillCheck?.isSelected = settings.gapFillEnabled
         methodLevelCheck?.isSelected = settings.methodLevelScanEnabled
         cacheCheck?.isSelected = settings.useCache
+        alternateCheck?.isSelected = settings.alternateSearchUiOnInvoke
         dialogPreferredCheck?.isSelected = settings.dialogSearchPreferred
         alwaysShowListCheck?.isSelected = settings.alwaysShowResultList
         maxVisibleCombo?.selectedItem = settings.maxVisibleResults

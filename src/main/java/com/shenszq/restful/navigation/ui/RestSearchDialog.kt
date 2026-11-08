@@ -19,8 +19,11 @@ import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.util.concurrent.ForkJoinPool
+import javax.swing.AbstractAction
+import javax.swing.Action
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -195,13 +198,41 @@ class RestSearchDialog(
         root.registerKeyboardAction({ RestSearchUiSwitch.toggleToPopup(project, this) },
             KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK or KeyEvent.ALT_DOWN_MASK),
             JComponent.WHEN_IN_FOCUSED_WINDOW)
-        // 输入框 → 列表（首/末项）
+        // 输入框 → 列表：普通 ↑/↓ 直接进入结果列表首/末项，弹出后即可仅用上下键选择，
+        // 无需先按组合键把焦点切到列表；保留 Ctrl+↑/↓ 兼容旧习惯。
+        textField.registerKeyboardAction(
+            { focusList(first = true) },
+            KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), JComponent.WHEN_FOCUSED)
+        textField.registerKeyboardAction(
+            { focusList(first = false) },
+            KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), JComponent.WHEN_FOCUSED)
         textField.registerKeyboardAction(
             { focusList(first = true) },
             KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED)
         textField.registerKeyboardAction(
             { focusList(first = false) },
             KeyStroke.getKeyStroke(KeyEvent.VK_UP, KeyEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED)
+        installListBackToInputShortcut()
+    }
+
+    /**
+     * 焦点已在列表时的上下键闭环：其余 ↑/↓ 仍走 JBList 原生选择移动；仅当已处于首行再按 ↑
+     * 时退回输入框继续编辑（ selectedIndex<=0 涵盖“无选中”与“首行”两种态），
+     * 让“输入 ↔ 结果列表”可纯靠方向键往返。
+     */
+    private fun installListBackToInputShortcut() {
+        val upStroke = KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)
+        val previousActionKey = resultList.inputMap.get(upStroke) ?: "selectionPrevious"
+        resultList.inputMap.put(upStroke, "restUpOrBackToInput")
+        resultList.actionMap.put("restUpOrBackToInput", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent) {
+                if (resultList.selectedIndex <= 0) {
+                    textField.requestFocusInWindow()
+                } else {
+                    (resultList.actionMap[previousActionKey] as? Action)?.actionPerformed(e)
+                }
+            }
+        })
     }
 
     private fun focusList(first: Boolean) {
