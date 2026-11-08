@@ -28,7 +28,7 @@ class SwitchRestSearchUiAction : AnAction(), DumbAware {
             )
             .notify(project)
         // 立即用新偏好重开，让“切换”有即时可见效果。
-        val action = ActionManager.getInstance().getAction("Toolkit.GotoService") as? GotoRequestMappingAction
+        val action = ActionManager.getInstance().getAction(RestfulRadarActions.GOTO_SERVICE) as? GotoRequestMappingAction
             ?: return
         if (dialogPreferred) action.showAsDialog(project)
         else RestServicesToolWindowFactory.activateAndFocusFilter(project)

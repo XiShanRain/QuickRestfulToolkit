@@ -41,18 +41,18 @@
     <actions>
         <group id="RestfulRadar.Tools" text="RestfulRadar" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="Toolkit.GotoService"
+            <action id="RestfulRadar.GotoService"
                     class="com.shenszq.restful.navigation.action.GotoRequestMappingAction"
                     text="Go to REST Service"
                     description="Jump to a REST controller method by URL"
                     icon="AllIcons.Actions.Search">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SLASH"/>
             </action>
-            <action id="Toolkit.RescanRest"
+            <action id="RestfulRadar.RescanRest"
                     class="com.shenszq.restful.navigation.action.RescanRestAction"
                     text="Rescan REST Mappings"
                     description="Clear cache and re-scan all REST mappings"/>
-            <action id="Toolkit.SwitchSearchUi"
+            <action id="RestfulRadar.SwitchSearchUi"
                     class="com.shenszq.restful.navigation.action.SwitchRestSearchUiAction"
                     text="Switch REST Search UI (Dialog / Right Panel)"
                     description="Toggle the preferred REST search entry between the dialog and the right RestfulRadar tool window">
@@ -62,13 +62,14 @@
                 两个独立入口动作：始终打开对话框 / 始终打开 IDE 标准弹层，不受首选形态偏好影响。
                 故意不写默认 <keyboard-shortcut>，避免与现有键位及 IDE 自带快捷键冲突；
                 用户可在 Settings > Keymap 搜 "REST Service (Dialog)" / "(Popup)" 各自绑定。
+                所有 action ID 统一用 RestfulRadar. 前缀，避免与其他 RestfulToolkit 系插件撞 ID。
             -->
-            <action id="Toolkit.GotoServiceDialog"
+            <action id="RestfulRadar.GotoServiceDialog"
                     class="com.shenszq.restful.navigation.action.OpenRestSearchDialogAction"
                     text="Go to REST Service (Dialog)"
                     description="Always open the dialog-style REST path search (project-wide)"
                     icon="AllIcons.Actions.Search"/>
-            <action id="Toolkit.GotoServicePopup"
+            <action id="RestfulRadar.GotoServicePopup"
                     class="com.shenszq.restful.navigation.action.OpenRestSearchPopupAction"
                     text="Go to REST Service (Popup)"
                     description="Always open the ChooseByName popup REST path search (project-wide)"

@@ -44,4 +44,4 @@ class OpenRestSearchPopupAction : AnAction(), DumbAware {
 
 /** 通过 ActionManager 取主入口动作实例，委托其对话框/弹层展示方法。 */
 private fun gotoAction(): GotoRequestMappingAction? =
-    ActionManager.getInstance().getAction("Toolkit.GotoService") as? GotoRequestMappingAction
+    ActionManager.getInstance().getAction(RestfulRadarActions.GOTO_SERVICE) as? GotoRequestMappingAction

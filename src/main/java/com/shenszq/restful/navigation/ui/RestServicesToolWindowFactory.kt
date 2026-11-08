@@ -31,6 +31,7 @@ import com.shenszq.restful.common.ToolkitIcons
 import com.shenszq.restful.common.UrlPatternUtils
 import com.shenszq.restful.navigation.action.GotoRequestMappingAction
 import com.shenszq.restful.navigation.action.RestServiceItem
+import com.shenszq.restful.navigation.action.RestfulRadarActions
 import com.shenszq.restful.scan.RestScanService
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -204,7 +205,7 @@ private class RestServicesPanel(private val project: Project) : JBPanel<JBPanel<
      * 打开全项目搜索对话框。本面板自己已有 URL 过滤框，因此这里固定弹对话框（不再“打开自己”）。
      */
     private fun openSearch() {
-        val action = ActionManager.getInstance().getAction("Toolkit.GotoService") as? GotoRequestMappingAction
+        val action = ActionManager.getInstance().getAction(RestfulRadarActions.GOTO_SERVICE) as? GotoRequestMappingAction
             ?: return
         action.showAsDialog(project)
     }

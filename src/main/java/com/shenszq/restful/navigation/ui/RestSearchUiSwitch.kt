@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.shenszq.restful.navigation.action.GotoRequestMappingAction
+import com.shenszq.restful.navigation.action.RestfulRadarActions
 import com.shenszq.restful.settings.RestfulToolkitSettings
 
 /**
@@ -47,7 +48,7 @@ object RestSearchUiSwitch {
         // 不安全上下文里立即执行（此时上一个模态窗口尚未完成关闭），nonModal() 保证在
         // “无模态窗口”的正常事件循环时机执行，等价于“上一个窗口确实关完之后”。
         ApplicationManager.getApplication().invokeLater({
-            val action = ActionManager.getInstance().getAction("Toolkit.GotoService") as? GotoRequestMappingAction
+            val action = ActionManager.getInstance().getAction(RestfulRadarActions.GOTO_SERVICE) as? GotoRequestMappingAction
                 ?: return@invokeLater
             action.showAsDialog(project)
         }, ModalityState.nonModal())

@@ -22,8 +22,10 @@ import java.io.File
  * - [gapFillEnabled] 控制是否对未被索引覆盖的 .java 文件做补漏扫描；
  * - es.exe 仅用于加速补漏阶段的文件枚举，可用则用、不可用自动回退文件系统递归。
  */
+// @State 的 name / 存储文件都带插件自己的命名空间：原版 RestfulToolkit 系插件若用
+// "RestfulToolkitSettings" / "restful-toolkit.xml"，两者同时安装会互相覆盖设置。
 @Service
-@State(name = "RestfulToolkitSettings", storages = [Storage("restful-toolkit.xml")])
+@State(name = "RestfulRadarSettings", storages = [Storage("restful-radar.xml")])
 class RestfulToolkitSettings : PersistentStateComponent<RestfulToolkitSettings.State> {
 
     class State {
