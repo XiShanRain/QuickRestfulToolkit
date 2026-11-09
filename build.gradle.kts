@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.xishanrain.restful.toolkit"
-version = "0.0.9"
+version = "0.0.10"
 
 repositories {
     mavenCentral()
@@ -42,6 +42,12 @@ intellijPlatform {
 
         // 面向用户的更新日志：Marketplace 详情页 “What's new” 直接展示，支持 HTML 子集
         changeNotes = """
+            <h3>0.0.10</h3>
+            <ul>
+                <li>迁移已弃用 API（ReadAction.compute、FilenameIndex.getFilesByName、URL 构造、
+                ChooseByNameModel.getCheckBoxMnemonic 等），提升对新版 IDE 的兼容性。</li>
+                <li>消除资源包兼容性警告：不再引用 IdeBundle 中被迁移的文案属性，改用插件自有文案。</li>
+            </ul>
             <h3>0.0.9</h3>
             <ul>
                 <li>新增独立入口动作 “Go to REST Service (Dialog)” 与 “Go to REST Service (Popup)”，可分别在 Settings → Keymap 中绑定快捷键，不受首选窗口形态影响。</li>

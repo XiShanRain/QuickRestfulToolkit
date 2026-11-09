@@ -1,6 +1,5 @@
 package com.xishanrain.restful.navigation.action
 
-import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.gotoByName.CustomMatcherModel
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
@@ -22,9 +21,10 @@ class GotoRequestMappingModel(project: Project, contributors: Array<ChooseByName
         if (item is RestServiceItem) item.method else null
 
     override fun getPromptText(): String = "Enter service URL path:"
-    override fun getNotInMessage(): String = IdeBundle.message("label.no.matches.found.in.project", myProject.name)
-    override fun getNotFoundMessage(): String = IdeBundle.message("label.no.matches.found")
-    override fun getCheckBoxMnemonic(): Char = 'N'
+
+    // 文案放在插件自己的代码里，不再引用 IdeBundle 中被迁移到 IdeDeprecatedMessagesBundle 的属性
+    override fun getNotInMessage(): String = "No matches found in project '${myProject.name}'"
+    override fun getNotFoundMessage(): String = "No matches found"
 
     override fun loadInitialCheckBoxState(): Boolean =
         PropertiesComponent.getInstance(myProject).getBoolean(ONLY_CURRENT_MODULE_KEY, false)

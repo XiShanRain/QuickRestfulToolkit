@@ -9,6 +9,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
@@ -269,7 +270,7 @@ private class RestServicesPanel(private val project: Project) : JBPanel<JBPanel<
     private fun fillDetail(item: RestServiceItem) {
         val fallbackUrl = RestHostResolver.DEFAULT_URI + item.url
         val values = runCatching {
-            ReadAction.compute<DetailValues, RuntimeException> {
+            runReadAction {
                 val fullUrl = RestHostResolver.serviceHostPrefix(item.module) + item.url
                 val method = RestMethodRequestInfo.toPsiMethod(item.psiElement)
                 val params = method?.let { RestMethodRequestInfo.buildParamString(it) }.orEmpty()

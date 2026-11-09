@@ -3,6 +3,7 @@ package com.xishanrain.restful.scan
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -15,7 +16,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
-import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import com.xishanrain.restful.common.ServiceHelper
@@ -224,9 +224,9 @@ class RestScanService(private val project: Project) : Disposable {
 
     private fun parseItems(vf: VirtualFile): List<RestServiceItem> {
         if (!vf.isValid) return emptyList()
-        val psiFile = ReadAction.compute<PsiFile?, Throwable> { PsiManager.getInstance(project).findFile(vf) }
+        val psiFile = runReadAction { PsiManager.getInstance(project).findFile(vf) }
         if (psiFile !is PsiJavaFile) return emptyList()
-        return ReadAction.compute<List<RestServiceItem>, Throwable> { fileScanner.parsePsiFile(psiFile) }
+        return runReadAction { fileScanner.parsePsiFile(psiFile) }
     }
 
     /** 设置项变化时让缓存签名失效，触发下次重建。 */

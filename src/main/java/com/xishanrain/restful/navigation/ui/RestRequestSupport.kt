@@ -1,6 +1,6 @@
 package com.xishanrain.restful.navigation.ui
 
-import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
@@ -14,11 +14,12 @@ import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiModifier
 import com.intellij.psi.PsiParameter
+import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.kotlin.asJava.toLightMethods
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,7 +66,7 @@ internal object RestHostResolver {
     }
 
     private fun computeHostPrefix(module: Module): String = runCatching {
-        ReadAction.compute<String, RuntimeException> {
+        runReadAction {
             val activeProfile = findPropertyValue(module, KEY_SPRING_PROFILE)
             val port = findPropertyValue(module, KEY_SERVER_PORT, activeProfile)
                 .takeIf { it.isNotBlank() } ?: DEFAULT_PORT
@@ -93,13 +94,14 @@ internal object RestHostResolver {
             for (extension in listOf("properties", "yml")) {
                 val fileName = configName + profileSuffix + "." + extension
                 val files = runCatching {
-                    FilenameIndex.getFilesByName(project, fileName, scope)
+                    FilenameIndex.getVirtualFilesByName(fileName, scope)
                 }.getOrNull() ?: continue
-                for (file in files) {
+                for (virtualFile in files) {
+                    val text = PsiManager.getInstance(project).findFile(virtualFile)?.text ?: continue
                     val value = if (extension == "properties") {
-                        parseProperties(file.text)[key]
+                        parseProperties(text)[key]
                     } else {
-                        parseYaml(file.text)[key]
+                        parseYaml(text)[key]
                     }
                     if (value != null) return cleanPlaceholder(value)
                 }
@@ -447,7 +449,7 @@ internal object RestHttpClient {
     }.getOrElse { errorText(target, it) }
 
     private fun open(url: String, method: String): HttpURLConnection {
-        val connection = URL(url).openConnection() as HttpURLConnection
+        val connection = URI(url).toURL().openConnection() as HttpURLConnection
         connection.requestMethod = method
         connection.connectTimeout = CONNECT_TIMEOUT_MS
         connection.readTimeout = READ_TIMEOUT_MS

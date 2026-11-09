@@ -2,7 +2,7 @@ package com.xishanrain.restful.navigation.action
 
 import com.intellij.navigation.ItemPresentation
 import com.intellij.navigation.NavigationItem
-import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.module.Module
 import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiElement
@@ -19,20 +19,20 @@ class RestServiceItem(
 ) : NavigationItem {
     val method: HttpMethod? = HttpMethod.getByRequestMethod(requestMethod)
     /** 展示用的“(模块 类#方法)”后缀；供对话框渲染器使用。 */
-    val locationText: String? = ReadAction.compute<String?, RuntimeException> { buildLocationString(psiElement, module?.name) }
+    val locationText: String? = runReadAction { buildLocationString(psiElement, module?.name) }
     private val locationString: String? = locationText
-    val dedupKey: String = ReadAction.compute<String, RuntimeException> { buildDedupKey(psiElement, url, method) }
+    val dedupKey: String = runReadAction { buildDedupKey(psiElement, url, method) }
 
     /** 所在模块名；供工具窗口按模块分组（对话框不使用）。 */
     val moduleName: String? = module?.name
 
     /** 控制器类简单名（非方法元素时退化为文件名）。 */
-    val className: String? = ReadAction.compute<String?, RuntimeException> {
+    val className: String? = runReadAction {
         (psiElement as? PsiMethod)?.containingClass?.name ?: psiElement.containingFile?.name
     }
 
     /** 该条目所在文件的绝对路径；用于计算“索引已覆盖文件集”，供补漏扫描做差集。 */
-    val filePath: String? = ReadAction.compute<String?, RuntimeException> {
+    val filePath: String? = runReadAction {
         psiElement.containingFile?.virtualFile?.path
     }
 
@@ -40,14 +40,14 @@ class RestServiceItem(
     override fun getPresentation(): ItemPresentation? = RestServiceItemPresentation()
 
     override fun navigate(requestFocus: Boolean) {
-        val navigatable: Navigatable? = ReadAction.compute<Navigatable?, RuntimeException> {
+        val navigatable: Navigatable? = runReadAction {
             val navElement = psiElement.navigationElement
             if (navElement is Navigatable) navElement else null
         }
         if (navigatable != null && navigatable.canNavigate()) navigatable.navigate(requestFocus)
     }
 
-    override fun canNavigate(): Boolean = ReadAction.compute<Boolean, RuntimeException> {
+    override fun canNavigate(): Boolean = runReadAction {
         val navElement = psiElement.navigationElement
         if (navElement is Navigatable) navElement.canNavigate() else false
     }

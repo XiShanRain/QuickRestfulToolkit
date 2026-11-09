@@ -1,6 +1,6 @@
 package com.xishanrain.restful.scan
 
-import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
@@ -90,7 +90,7 @@ class RestFileScanner(private val project: Project) {
     }
 
     private fun getJavaFilesViaIde(): List<VirtualFile> {
-        val indexed = ReadAction.compute<Collection<VirtualFile>, Throwable> {
+        val indexed = runReadAction {
             FilenameIndex.getAllFilesByExt(project, "java", GlobalSearchScope.projectScope(project))
         }.toList()
 
