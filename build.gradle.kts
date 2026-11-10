@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 plugins {
@@ -7,7 +8,7 @@ plugins {
 }
 
 group = "com.xishanrain.restful.toolkit"
-version = "0.0.10"
+version = "0.0.11"
 
 repositories {
     mavenCentral()
@@ -42,6 +43,14 @@ intellijPlatform {
 
         // 面向用户的更新日志：Marketplace 详情页 “What's new” 直接展示，支持 HTML 子集
         changeNotes = """
+            <h3>0.0.11</h3>
+            <ul>
+                <li>彻底消除“使用内部 API（Internal API）”警告：工具窗口工厂改为纯 Java 实现，
+                不再产生 Kotlin 为 ToolWindowFactory 默认方法生成的桥接调用；</li>
+                <li>插件版本号改为构建期写入资源文件，不再调用 2026.3 中已标记为内部的
+                PluginManagerCore.getPlugin。</li>
+                <li>新增自定义插件图标（雷达扫描 + 命中接口），替换默认的插件 SDK 图标。</li>
+            </ul>
             <h3>0.0.10</h3>
             <ul>
                 <li>迁移已弃用 API（ReadAction.compute、FilenameIndex.getFilesByName、URL 构造、
@@ -84,6 +93,16 @@ intellijPlatform {
 sourceSets {
     main {
         kotlin.srcDirs("src/main/java")
+    }
+}
+
+// 把项目版本号写入资源文件，供设置页展示。
+// 不用 PluginManagerCore.getPlugin(...)：该方法在 2026.3+ 为 @ApiStatus.Internal，会被 Verifier 判为内部 API。
+tasks.processResources {
+    val pluginVersion = project.version.toString()
+    inputs.property("pluginVersion", pluginVersion)
+    filesMatching("restfulradar.properties") {
+        filter<ReplaceTokens>("tokens" to mapOf("version" to pluginVersion))
     }
 }
 

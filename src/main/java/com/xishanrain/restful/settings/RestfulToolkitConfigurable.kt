@@ -1,7 +1,5 @@
 package com.xishanrain.restful.settings
 
-import com.intellij.ide.plugins.PluginManagerCore
-import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.ProjectManager
@@ -17,6 +15,7 @@ import javax.swing.JComponent
 import javax.swing.JFileChooser
 import javax.swing.JLabel
 import javax.swing.JPanel
+import java.util.Properties
 import javax.swing.border.EmptyBorder
 
 /**
@@ -44,9 +43,17 @@ class RestfulToolkitConfigurable : Configurable {
 
     override fun getDisplayName(): String = "RestfulRadar"
 
-    /** 插件版本号：构建时由 patchPluginXml 写入 plugin.xml，运行时从描述符读取，随发布包自动更新。 */
+    /**
+     * 插件版本号：构建时由 Gradle 把 `version` 写入 [VERSION_RESOURCE]，运行时只读资源文件。
+     *
+     * 不用 `PluginManagerCore.getPlugin(...)`：该方法在 2026.3+ 标记为 @ApiStatus.Internal，
+     * 会被 Plugin Verifier 判为“使用内部 API”；而官方替代 PluginDetailsService 在 2024.3
+     * 尚不存在（插件编译下限），因此改由构建期注入，跨版本稳定。
+     */
     private fun pluginVersion(): String =
-        PluginManagerCore.getPlugin(PluginId.getId("com.xishanrain.restful.restfulradar"))?.version ?: "未知"
+        RestfulToolkitConfigurable::class.java.getResourceAsStream(VERSION_RESOURCE)?.use { input ->
+            Properties().apply { load(input) }.getProperty("version")
+        }?.takeIf { it.isNotBlank() } ?: "未知"
 
     override fun createComponent(): JComponent {
         gapFillCheck = JBCheckBox("为未被索引覆盖的文件启用补漏扫描（推荐）", settings.gapFillEnabled)
@@ -212,4 +219,8 @@ class RestfulToolkitConfigurable : Configurable {
 
     private fun selectedDefaultUi(): DefaultUi =
         defaultUiCombo?.selectedItem as? DefaultUi ?: currentDefaultUi()
+
+    private companion object {
+        const val VERSION_RESOURCE = "/restfulradar.properties"
+    }
 }
