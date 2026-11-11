@@ -136,7 +136,7 @@
                 displayName="RestfulRadar"/>
         <toolWindow id="RestfulRadar"
                     anchor="right"
-                    icon="/icons/service.png"
+                    icon="/icons/pluginIcon.png"
                     factoryClass="com.xishanrain.restful.navigation.ui.RestServicesToolWindowFactory"
                     doNotActivateOnStart="true"/>
     </extensions>

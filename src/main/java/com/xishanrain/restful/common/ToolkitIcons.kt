@@ -6,7 +6,7 @@ import com.xishanrain.restful.method.HttpMethod
 import javax.swing.Icon
 
 object ToolkitIcons {
-    val SERVICE = IconLoader.getIcon("/icons/service.png", ToolkitIcons::class.java)
+    val SERVICE = IconLoader.getIcon("/icons/pluginIcon.png", ToolkitIcons::class.java)
 
     object Method {
         val GET = IconLoader.getIcon("/icons/method/g.png", ToolkitIcons::class.java)
